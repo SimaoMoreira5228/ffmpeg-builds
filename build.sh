@@ -139,6 +139,7 @@ build_autotools_dep "https://github.com/xiph/opus.git" "opus" "sh ./configure --
 build_autotools_dep "https://github.com/xiph/ogg.git" "ogg" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
 ### 11. libvorbis
+# we remove `-force_cpusubtype_ALL` from configure.ac for macOS because it's no longer supported on macOS 15 (https://gitlab.xiph.org/xiph/vorbis/-/issues/2352)
 if [ "$ARTIFACT_OS" = "macOS" ]; then
     patch_configure="sed -i '' 's/ -force_cpusubtype_ALL//g' configure.ac"
 else
