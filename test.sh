@@ -53,6 +53,7 @@ build_autotools_dep() {
     dir_name=$2
     configure_cmd=$3
     run_before_conf_cmd=$4
+    skip_autogen=$5
 
     echo "Building $dir_name with Autotools"
     run_cmd "git clone --depth 1 $repo $dir_name"
@@ -61,7 +62,7 @@ build_autotools_dep() {
         echo "Running pre-configure command for $dir_name"
         run_cmd "$run_before_conf_cmd"
     fi
-    if [ -f "autogen.sh" ]; then
+    if [ -z "$skip_autogen" ] && [ -f "autogen.sh" ]; then
         run_cmd "sh autogen.sh"
     fi
     run_cmd "$configure_cmd"
