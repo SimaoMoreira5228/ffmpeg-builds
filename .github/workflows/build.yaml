@@ -51,11 +51,11 @@ jobs:
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
         shell: msys2 {0}
-        run: sh build.sh
+        run: sh test.sh
 
       - name: Build FFmpeg Linux/macOS
         if: matrix.os != 'windows-2022'
-        run: sh build.sh
+        run: sh test.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
