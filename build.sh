@@ -78,7 +78,7 @@ build_meson_dep() {
     meson_cmd=$3
 
     echo "Building $dir_name with Meson"
-    run_cmd "git clone --depth 1 $repo $dir_name"
+    run_cmd "git clone $repo $dir_name"
     cd "$SRC_DIR/$dir_name"
     run_cmd "$meson_cmd"
     run_cmd "ninja -Cbuild"
@@ -139,7 +139,7 @@ build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype
 build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
 
 ### 8. fontconfig
-build_meson_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "meson setup build --prefix=$DEPS_DIR --default-library=static"
+build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --disable-docs --disable-tests" "" "skip"
 
 ### 9. libass
 build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static"
