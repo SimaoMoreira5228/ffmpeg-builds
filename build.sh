@@ -99,7 +99,7 @@ run_cmd "git clone https://github.com/google/brotli.git libbrotli"
 libbrotli_build_dir="$SRC_DIR/libbrotli_build"
 mkdir -p "$libbrotli_build_dir"
 cd "$libbrotli_build_dir"
-run_cmd "cmake ../libbrotli -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+run_cmd "cmake ../libbrotli -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 run_cmd "cmake --build . -j$CPU_COUNT"
 run_cmd "cmake --install ."
 cd "$SRC_DIR"
@@ -139,7 +139,7 @@ build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype
 build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
 
 ### 8. fontconfig
-build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --disable-docs --disable-tests" "" "skip"
+build_meson_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "meson setup build --prefix=$DEPS_DIR -Ddefault_library=static -Ddoc=disabled -Dtests=disabled"
 
 ### 9. libass
 build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static"
@@ -178,8 +178,9 @@ if [ "$ARTIFACT_OS" = "Windows" ]; then
     build_dir="build/linux"
     cmake_cmd="cmake -G \"MSYS Makefiles\" ../../source && cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 elif [ "$ARTIFACT_OS" = "Linux" ] && [ "$ARCH" = "arm64" ]; then
+    run_cmd "git checkout 0e0eee580c2437fa37a951f121cf1becc2d4b3ca"
     build_dir="build/aarch64-linux"
-    cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DENABLE_SVE2=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+    cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 elif [ "$ARTIFACT_OS" = "macOS" ] && [ "$ARCH" = "arm64" ]; then
     build_dir="build/aarch64-darwin"
     cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
