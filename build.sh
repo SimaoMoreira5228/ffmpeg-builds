@@ -29,7 +29,7 @@ case "$ARCH" in
 esac
 
 # Set environment variable for pkg-config
-export PKG_CONFIG_PATH="$DEPS_DIR/lib/aarch64-linux-gnu/pkgconfig:$DEPS_DIR/lib/x86_64-linux-gnu/pkgconfig:$DEPS_DIR/lib/pkgconfig"
+export PKG_CONFIG_PATH="$DEPS_DIR/lib/pkgconfig:$DEPS_DIR/lib/aarch64-linux-gnu/pkgconfig:$DEPS_DIR/lib/x86_64-linux-gnu/pkgconfig:$DEPS_DIR/lib64/pkgconfig"
 
 # Get CPU count
 if [ "$ARTIFACT_OS" = "macOS" ]; then
@@ -129,11 +129,11 @@ build_autotools_dep "https://github.com/openssl/openssl.git" "openssl" "$openssl
 ### 4. libpng
 build_autotools_dep "https://github.com/glennrp/libpng.git" "libpng" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "" "skip"
 
-### 5. freetype2
-build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype" "meson setup build --prefix=$DEPS_DIR --default-library=static"
-
-### 6. harfbuzz
+### 5. harfbuzz
 build_meson_dep "https://github.com/harfbuzz/harfbuzz.git" "harfbuzz" "meson setup build --prefix=$DEPS_DIR --default-library=static"
+
+### 6. freetype2
+build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype" "meson setup build --prefix=$DEPS_DIR --default-library=static"
 
 ### 7. fribidi
 build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
