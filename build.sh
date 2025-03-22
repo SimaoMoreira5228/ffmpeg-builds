@@ -30,6 +30,7 @@ esac
 
 # Set environment variable for pkg-config
 export PKG_CONFIG_PATH="$DEPS_DIR/lib/pkgconfig:$DEPS_DIR/lib/aarch64-linux-gnu/pkgconfig:$DEPS_DIR/lib/x86_64-linux-gnu/pkgconfig:$DEPS_DIR/lib64/pkgconfig"
+export PKG_CONFIG="pkg-config --static"
 
 # Get CPU count
 if [ "$ARTIFACT_OS" = "macOS" ]; then
@@ -63,7 +64,11 @@ build_autotools_dep() {
         run_cmd "$run_before_conf_cmd"
     fi
     if [ -z "$skip_autogen" ] && [ -f "autogen.sh" ]; then
-        run_cmd "sh autogen.sh"
+        if [ "$ARTIFACT_OS" = "macOS" ]; then
+            run_cmd "LIBTOOLIZE=glibtoolize sh autogen.sh"
+        else
+            run_cmd "sh autogen.sh"
+        fi
     fi
     run_cmd "$configure_cmd"
     run_cmd "make -j$CPU_COUNT"
@@ -139,7 +144,8 @@ build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype
 build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
 
 ### 8. fontconfig
-build_meson_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddoc=disabled -Dtests=disabled -Dtools=disabled"
+#build_meson_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddoc=disabled -Dtests=disabled -Dtools=disabled"
+build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" --disable-docs --disable-tests --disable-tools"
 
 ### 9. libass
 build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static"
