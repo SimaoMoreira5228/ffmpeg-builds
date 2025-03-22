@@ -143,26 +143,35 @@ build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype
 ### 7. fribidi
 build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
 
-### 8. fontconfig
-#build_meson_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddoc=disabled -Dtests=disabled -Dtools=disabled"
-build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" --disable-docs --disable-tests --disable-tools"
+### 8. libexpat
+echo "Building libexpat"
+run_cmd "git clone https://github.com/libexpat/libexpat.git libexpat"
+cd "$SRC_DIR/libexpat/expat"
+run_cmd "./buildconf.sh"
+run_cmd "./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+run_cmd "make -j$CPU_COUNT"
+run_cmd "make install"
+cd "$SRC_DIR"
 
-### 9. libass
+### 9. fontconfig
+build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" --disable-docs --disable-tests --disable-tools --disable-nls"
+
+### 10. libass
 build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static"
 
-### 10. libfdk-aac
+### 11. libfdk-aac
 build_autotools_dep "https://github.com/mstorsjo/fdk-aac.git" "fdk-aac" "sh autogen.sh && ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
-### 11. libmp3lame
+### 12. libmp3lame
 build_autotools_dep "https://github.com/lameproject/lame.git" "lame" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --enable-nasm --disable-gtktest --disable-frontend CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
-### 12. libopus
+### 13. libopus
 build_autotools_dep "https://github.com/xiph/opus.git" "opus" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
-### 13. libogg
+### 14. libogg
 build_autotools_dep "https://github.com/xiph/ogg.git" "ogg" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
-### 14. libvorbis
+### 15. libvorbis
 # we remove `-force_cpusubtype_ALL` from configure.ac for macOS because it's no longer supported on macOS 15 (https://gitlab.xiph.org/xiph/vorbis/-/issues/2352)
 if [ "$ARTIFACT_OS" = "macOS" ]; then
     patch_configure="sed -i '' 's/ -force_cpusubtype_ALL//g' configure.ac"
@@ -171,13 +180,13 @@ else
 fi
 build_autotools_dep "https://gitlab.xiph.org/xiph/vorbis.git" "vorbis" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --with-ogg=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "$patch_configure"
 
-### 15. libvpx
+### 16. libvpx
 build_autotools_dep "https://github.com/webmproject/libvpx.git" "libvpx" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared"
 
-### 16. libx264
+### 17. libx264
 build_autotools_dep "https://code.videolan.org/videolan/x264.git" "x264" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-opencl --disable-bashcompletion --extra-cflags=\"-fPIC\" CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
-### 17. libx265
+### 18. libx265
 echo "Building x265"
 run_cmd "git clone https://bitbucket.org/multicoreware/x265_git.git x265"
 if [ "$ARTIFACT_OS" = "Windows" ]; then
@@ -206,7 +215,7 @@ run_cmd "make -j$CPU_COUNT"
 run_cmd "make install"
 cd "$SRC_DIR"
 
-### 18. libaom
+### 19. libaom
 echo "Building libaom"
 run_cmd "git clone https://aomedia.googlesource.com/aom aom"
 aom_build_dir="$SRC_DIR/aom_build"
@@ -217,10 +226,10 @@ run_cmd "cmake --build . -j$CPU_COUNT"
 run_cmd "cmake --install ."
 cd "$SRC_DIR"
 
-### 19. libwebp
+### 20. libwebp
 build_autotools_dep "https://github.com/webmproject/libwebp.git" "libwebp" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
-### 20. libdav1d
+### 21. libdav1d
 build_meson_dep "https://code.videolan.org/videolan/dav1d.git" "dav1d" "meson setup build --prefix=$DEPS_DIR --default-library=static"
 
 # Function to build FFmpeg
