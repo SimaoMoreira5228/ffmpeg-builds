@@ -33,7 +33,7 @@ jobs:
         if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm'
         # Using meson from pip because the version in the Ubuntu 22.04 repository is too old
         run: |
-          sudo apt-get update && sudo apt-get install -y git build-essential nasm yasm cmake ninja-build pkg-config gcc-12 g++-12 libtool
+          sudo apt-get update && sudo apt-get install -y git build-essential nasm yasm cmake ninja-build pkg-config gcc-12 g++-12 libtool autoconf automake autopoint gperf gettext
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 120
           sudo update-alternatives --config gcc
@@ -50,7 +50,7 @@ jobs:
         with:
           msystem: 'MINGW64'
           update: true
-          install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config perl make mingw-w64-x86_64-autotools autoconf-archive libtool
+          install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config perl make mingw-w64-x86_64-autotools autoconf-archive libtool mingw-w64-x86_64-gperf mingw-w64-x86_64-gettext-libtextstyle mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools
 
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'

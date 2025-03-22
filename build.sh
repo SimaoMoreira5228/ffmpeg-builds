@@ -144,8 +144,7 @@ build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype
 build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
 
 ### 8. fontconfig
-#build_meson_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddoc=disabled -Dtests=disabled -Dtools=disabled"
-build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" --disable-docs --disable-tests --disable-tools"
+build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" --disable-docs --disable-tests --disable-tools --disable-nls"
 
 ### 9. libass
 build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static"
