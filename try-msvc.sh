@@ -18,9 +18,9 @@ Linux*) ARTIFACT_OS="Linux" ;;
 Darwin*) ARTIFACT_OS="macOS" ;;
 CYGWIN* | MINGW* | MSYS*) ARTIFACT_OS="Windows" ;;
 *)
-    echo "Unsupported OS: $OS"
-    exit 1
-    ;;
+  echo "Unsupported OS: $OS"
+  exit 1
+  ;;
 esac
 
 # Detect ARCH
@@ -29,9 +29,9 @@ case "$ARCH" in
 x86_64 | amd64) ARCH="x86_64" ;;
 aarch64 | arm64) ARCH="arm64" ;;
 *)
-    echo "Unsupported architecture: $ARCH"
-    exit 1
-    ;;
+  echo "Unsupported architecture: $ARCH"
+  exit 1
+  ;;
 esac
 
 # Set environment variable for pkg-config
@@ -40,61 +40,93 @@ export PKG_CONFIG="pkg-config --static"
 
 # Get CPU count
 if [ "$ARTIFACT_OS" = "macOS" ]; then
-    CPU_COUNT=$(sysctl -n hw.ncpu)
+  CPU_COUNT=$(sysctl -n hw.ncpu)
 else
-    CPU_COUNT=$(nproc)
+  CPU_COUNT=$(nproc)
 fi
 [ -z "$CPU_COUNT" ] && CPU_COUNT=4
 echo "CPU count: $CPU_COUNT"
 echo "Detected ARTIFACT_OS: $ARTIFACT_OS, ARCH: $ARCH"
 
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+  USE_MSVC=1
+else
+  USE_MSVC=0
+fi
+
 # Helper function to run commands
 run_cmd() {
-    echo "Running: $1"
-    bash -c "$1"
+  echo "Running: $1"
+  bash -c "$1"
 }
 
 # Function to build Autotools-based dependencies
 build_autotools_dep() {
-    repo=$1
-    dir_name=$2
-    configure_cmd=$3
-    run_before_conf_cmd=$4
-    skip_autogen=$5
+  repo=$1
+  dir_name=$2
+  configure_cmd=$3
+  run_before_conf_cmd=$4
+  skip_autogen=$5
 
-    echo "Building $dir_name with Autotools"
-    run_cmd "git clone --depth 1 $repo $dir_name"
-    cd "$SRC_DIR/$dir_name"
-    if [ -n "$run_before_conf_cmd" ]; then
-        echo "Running pre-configure command for $dir_name"
-        run_cmd "$run_before_conf_cmd"
+  echo "Building $dir_name with Autotools"
+  run_cmd "git clone --depth 1 $repo $dir_name"
+  cd "$SRC_DIR/$dir_name"
+  if [ -n "$run_before_conf_cmd" ]; then
+    echo "Running pre-configure command for $dir_name"
+    run_cmd "$run_before_conf_cmd"
+  fi
+  if [ -z "$skip_autogen" ] && [ -f "autogen.sh" ]; then
+    if [ "$ARTIFACT_OS" = "macOS" ]; then
+      run_cmd "LIBTOOLIZE=glibtoolize sh autogen.sh"
+    else
+      run_cmd "sh autogen.sh"
     fi
-    if [ -z "$skip_autogen" ] && [ -f "autogen.sh" ]; then
-        if [ "$ARTIFACT_OS" = "macOS" ]; then
-            run_cmd "LIBTOOLIZE=glibtoolize sh autogen.sh"
-        else
-            run_cmd "sh autogen.sh"
-        fi
-    fi
+  fi
+  if [ "$USE_MSVC" = "1" ]; then
+    run_cmd "CC=cl $configure_cmd"
+    run_cmd "nmake"
+    run_cmd "nmake install"
+  else
     run_cmd "$configure_cmd"
     run_cmd "make -j$CPU_COUNT"
     run_cmd "make install"
-    cd "$SRC_DIR"
+  fi
+  cd "$SRC_DIR"
 }
 
 # Function to build Meson-based dependencies
 build_meson_dep() {
-    repo=$1
-    dir_name=$2
-    meson_cmd=$3
+  repo=$1
+  dir_name=$2
+  meson_cmd=$3
 
-    echo "Building $dir_name with Meson"
-    run_cmd "git clone $repo $dir_name"
-    cd "$SRC_DIR/$dir_name"
-    run_cmd "$meson_cmd"
-    run_cmd "ninja -Cbuild"
-    run_cmd "ninja -Cbuild install"
-    cd "$SRC_DIR"
+  echo "Building $dir_name with Meson"
+  run_cmd "git clone $repo $dir_name"
+  cd "$SRC_DIR/$dir_name"
+  run_cmd "$meson_cmd"
+  run_cmd "ninja -Cbuild"
+  run_cmd "ninja -Cbuild install"
+  cd "$SRC_DIR"
+}
+
+# Function to build CMake-based dependencies
+build_cmake_dep() {
+  repo=$1
+  dir_name=$2
+  cmake_options=$3
+
+  echo "Building $dir_name with CMake"
+  run_cmd "git clone $repo $dir_name"
+  cd "$SRC_DIR/$dir_name"
+  if [ "$USE_MSVC" = "1" ]; then
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release $cmake_options ."
+    run_cmd "cmake --build build --config Release --target install"
+  else
+    run_cmd "cmake -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release $cmake_options ."
+    run_cmd "cmake --build build -j$CPU_COUNT"
+    run_cmd "cmake --install build"
+  fi
+  cd "$SRC_DIR"
 }
 
 echo "Building for $ARTIFACT_OS ($ARCH)"
@@ -102,37 +134,34 @@ echo "Building for $ARTIFACT_OS ($ARCH)"
 # Build dependencies in order
 
 ### 1. zlib
-build_autotools_dep "https://github.com/madler/zlib.git" "zlib" "sh ./configure --prefix=$DEPS_DIR --static CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+build_autotools_dep "https://github.com/madler/zlib.git" "zlib" "sh ./configure --prefix=$DEPS_DIR --static"
 
 ### 2. libbrotli
 echo "Building libbrotli"
-run_cmd "git clone https://github.com/google/brotli.git libbrotli"
-libbrotli_build_dir="$SRC_DIR/libbrotli_build"
-mkdir -p "$libbrotli_build_dir"
-cd "$libbrotli_build_dir"
-run_cmd "cmake ../libbrotli -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
-run_cmd "cmake --build . -j$CPU_COUNT"
-run_cmd "cmake --install ."
-cd "$SRC_DIR"
+build_cmake_dep "https://github.com/google/brotli.git" "libbrotli" "-DBUILD_SHARED_LIBS=OFF CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
 ### 3. OpenSSL
 if [ "$ARTIFACT_OS" = "Windows" ]; then
+  if [ "$USE_MSVC" = "1" ]; then
+    config="VC-WIN64A"
+  else
     config="mingw64"
+  fi
 elif [ "$ARTIFACT_OS" = "macOS" ]; then
-    if [ "$ARCH" = "arm64" ]; then
-        config="darwin64-arm64-cc"
-    else
-        config="darwin64-x86_64-cc"
-    fi
+  if [ "$ARCH" = "arm64" ]; then
+    config="darwin64-arm64-cc"
+  else
+    config="darwin64-x86_64-cc"
+  fi
 elif [ "$ARTIFACT_OS" = "Linux" ]; then
-    if [ "$ARCH" = "arm64" ]; then
-        config="linux-aarch64"
-    else
-        config="linux-x86_64"
-    fi
+  if [ "$ARCH" = "arm64" ]; then
+    config="linux-aarch64"
+  else
+    config="linux-x86_64"
+  fi
 else
-    echo "Unsupported OS: $ARTIFACT_OS"
-    exit 1
+  echo "Unsupported OS: $ARTIFACT_OS"
+  exit 1
 fi
 openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
 build_autotools_dep "https://github.com/openssl/openssl.git" "openssl" "$openssl_configure"
@@ -180,9 +209,9 @@ build_autotools_dep "https://github.com/xiph/ogg.git" "ogg" "sh ./configure --pr
 ### 15. libvorbis
 # we remove `-force_cpusubtype_ALL` from configure.ac for macOS because it's no longer supported on macOS 15 (https://gitlab.xiph.org/xiph/vorbis/-/issues/2352)
 if [ "$ARTIFACT_OS" = "macOS" ]; then
-    patch_configure="sed -i '' 's/ -force_cpusubtype_ALL//g' configure.ac"
+  patch_configure="sed -i '' 's/ -force_cpusubtype_ALL//g' configure.ac"
 else
-    patch_configure=""
+  patch_configure=""
 fi
 build_autotools_dep "https://gitlab.xiph.org/xiph/vorbis.git" "vorbis" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --with-ogg=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "$patch_configure"
 
@@ -196,20 +225,20 @@ build_autotools_dep "https://code.videolan.org/videolan/x264.git" "x264" "sh ./c
 echo "Building x265"
 run_cmd "git clone https://bitbucket.org/multicoreware/x265_git.git x265"
 if [ "$ARTIFACT_OS" = "Windows" ]; then
-    build_dir="build/linux"
-    cmake_cmd="cmake -G \"MSYS Makefiles\" ../../source && cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+  build_dir="build/linux"
+  cmake_cmd="cmake -G \"Visual Studio 17 2022\" ../../source && cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 elif [ "$ARTIFACT_OS" = "Linux" ] && [ "$ARCH" = "arm64" ]; then
-    build_dir="build/aarch64-linux"
-    cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DENABLE_SVE2=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+  build_dir="build/aarch64-linux"
+  cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DENABLE_SVE2=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 elif [ "$ARTIFACT_OS" = "macOS" ] && [ "$ARCH" = "arm64" ]; then
-    build_dir="build/aarch64-darwin"
-    cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+  build_dir="build/aarch64-darwin"
+  cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 elif [ "$ARTIFACT_OS" = "macOS" ]; then
-    build_dir="build/linux"
-    cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DENABLE_ASSEMBLY=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+  build_dir="build/linux"
+  cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DENABLE_ASSEMBLY=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 else
-    build_dir="build/linux"
-    cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+  build_dir="build/linux"
+  cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 fi
 # this goes to release 4.1
 cd "$SRC_DIR/x265"
@@ -223,14 +252,7 @@ cd "$SRC_DIR"
 
 ### 19. libaom
 echo "Building libaom"
-run_cmd "git clone https://aomedia.googlesource.com/aom aom"
-aom_build_dir="$SRC_DIR/aom_build"
-mkdir -p "$aom_build_dir"
-cd "$aom_build_dir"
-run_cmd "cmake ../aom -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=0 -DENABLE_DOCS=0 CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" -DCMAKE_INSTALL_PREFIX=$DEPS_DIR"
-run_cmd "cmake --build . -j$CPU_COUNT"
-run_cmd "cmake --install ."
-cd "$SRC_DIR"
+build_cmake_dep "https://aomedia.googlesource.com/aom" "aom" "-DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=0 -DENABLE_DOCS=0 CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
 ### 20. libwebp
 build_autotools_dep "https://github.com/webmproject/libwebp.git" "libwebp" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
@@ -240,26 +262,32 @@ build_meson_dep "https://code.videolan.org/videolan/dav1d.git" "dav1d" "meson se
 
 # Function to build FFmpeg
 build_ffmpeg() {
-    version=$1
-    branch=$2
-    echo "Building FFmpeg $version"
-    ffmpeg_dir="$SRC_DIR/ffmpeg-$version"
-    build_dir_version="$BUILD_DIR/ffmpeg-$version"
-    mkdir -p "$build_dir_version"
-    run_cmd "git clone --depth 1 --branch $branch https://github.com/FFmpeg/FFmpeg.git ffmpeg-$version"
-    cd "$ffmpeg_dir"
+  version=$1
+  branch=$2
+  echo "Building FFmpeg $version"
+  ffmpeg_dir="$SRC_DIR/ffmpeg-$version"
+  build_dir_version="$BUILD_DIR/ffmpeg-$version"
+  mkdir -p "$build_dir_version"
+  run_cmd "git clone --depth 1 --branch $branch https://github.com/FFmpeg/FFmpeg.git ffmpeg-$version"
+  cd "$ffmpeg_dir"
+  if [ "$USE_MSVC" = "1" ]; then
+    configure_cmd="./configure --toolchain=msvc --prefix=$build_dir_version --disable-static --enable-shared --pkg-config-flags=\"--static\" --extra-cflags=\"-I$DEPS_DIR/include\" --extra-ldflags=\"/LIBPATH:$DEPS_DIR/lib\" --enable-gpl --enable-nonfree --enable-version3 --enable-openssl --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libdav1d --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libaom --enable-libwebp --enable-zlib --disable-autodetect"
+    make_cmd="nmake"
+  else
     configure_cmd="./configure --prefix=$build_dir_version --disable-static --enable-shared --pkg-config-flags=\"--static\" --extra-cflags=\"-I$DEPS_DIR/include\" --extra-ldflags=\"-L$DEPS_DIR/lib\" --enable-gpl --enable-nonfree --enable-version3 --enable-openssl --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libdav1d --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libaom --enable-libwebp --enable-zlib --disable-autodetect"
-    run_cmd "$configure_cmd"
-    run_cmd "make -j$CPU_COUNT"
-    run_cmd "make install"
-    artifact_name="ffmpeg-$version-$ARTIFACT_OS-$ARCH.tar.gz"
-    echo "Creating artifact: $artifact_name"
-    run_cmd "tar -czf $SRC_DIR/$artifact_name -C $build_dir_version ."
-    cd "$SRC_DIR"
+    make_cmd="make -j$CPU_COUNT"
+  fi
+  run_cmd "$configure_cmd"
+  run_cmd "$make_cmd"
+  run_cmd "$make_cmd install"
+  artifact_name="ffmpeg-$version-$ARTIFACT_OS-$ARCH.tar.gz"
+  echo "Creating artifact: $artifact_name"
+  run_cmd "tar -czf $SRC_DIR/$artifact_name -C $build_dir_version ."
+  cd "$SRC_DIR"
 }
 
 if [ "$ARTIFACT_OS" = "Linux" ]; then
-    sudo mv /usr/lib/x86_64-linux-gnu/libfontconfig.so /usr/lib/x86_64-linux-gnu/libfontconfig.so.bak || true
+  sudo mv /usr/lib/x86_64-linux-gnu/libfontconfig.so /usr/lib/x86_64-linux-gnu/libfontconfig.so.bak || true
 fi
 
 # Build FFmpeg versions
@@ -268,7 +296,7 @@ build_ffmpeg "6.1" "release/6.1"
 build_ffmpeg "master" "master"
 
 if [ "$ARTIFACT_OS" = "Linux" ]; then
-    sudo mv /usr/lib/x86_64-linux-gnu/libfontconfig.so.bak /usr/lib/x86_64-linux-gnu/libfontconfig.so || true
+  sudo mv /usr/lib/x86_64-linux-gnu/libfontconfig.so.bak /usr/lib/x86_64-linux-gnu/libfontconfig.so || true
 fi
 
 echo "Build completed successfully"

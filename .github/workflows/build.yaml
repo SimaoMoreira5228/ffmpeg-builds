@@ -22,8 +22,8 @@ jobs:
           - ubuntu-22.04
           - ubuntu-22.04-arm
           - windows-2022
-          - macos-13  # x86_64
-          - macos-15  # ARM64
+          - macos-13 # x86_64
+          - macos-15 # ARM64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -48,18 +48,18 @@ jobs:
         if: matrix.os == 'windows-2022'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: 'MINGW64'
+          msystem: "MINGW64"
           update: true
           install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config perl make mingw-w64-x86_64-autotools autoconf-archive libtool mingw-w64-x86_64-gperf mingw-w64-x86_64-gettext-libtextstyle mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools
 
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
         shell: msys2 {0}
-        run: sh build.sh
+        run: sh try-msvc.sh
 
       - name: Build FFmpeg Linux/macOS
         if: matrix.os != 'windows-2022'
-        run: sh build.sh
+        run: sh try-msvc.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -70,7 +70,7 @@ jobs:
 
   release:
     name: Release
-    needs: [ build ]
+    needs: [build]
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'pull_request' }}
     permissions:
