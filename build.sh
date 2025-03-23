@@ -102,7 +102,15 @@ echo "Building for $ARTIFACT_OS ($ARCH)"
 # Build dependencies in order
 
 ### 1. zlib
-build_autotools_dep "https://github.com/madler/zlib.git" "zlib" "sh ./configure --prefix=$DEPS_DIR --static CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://github.com/madler/zlib.git zlib"
+    cd "$SRC_DIR/zlib"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
+else
+    build_autotools_dep "https://github.com/madler/zlib.git" "zlib" "sh ./configure --prefix=$DEPS_DIR --static CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+fi
 
 ### 2. libbrotli
 echo "Building libbrotli"
@@ -110,14 +118,19 @@ run_cmd "git clone https://github.com/google/brotli.git libbrotli"
 libbrotli_build_dir="$SRC_DIR/libbrotli_build"
 mkdir -p "$libbrotli_build_dir"
 cd "$libbrotli_build_dir"
-run_cmd "cmake ../libbrotli -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
-run_cmd "cmake --build . -j$CPU_COUNT"
-run_cmd "cmake --install ."
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "cmake ../libbrotli -G \"Visual Studio 17 2022\" -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+    run_cmd "cmake --build build --config Release --target install"
+else
+    run_cmd "cmake ../libbrotli -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+    run_cmd "cmake --build . -j$CPU_COUNT"
+    run_cmd "cmake --install ."
+fi
 cd "$SRC_DIR"
 
 ### 3. OpenSSL
 if [ "$ARTIFACT_OS" = "Windows" ]; then
-    config="mingw64"
+    config="VC-WIN64A"
 elif [ "$ARTIFACT_OS" = "macOS" ]; then
     if [ "$ARCH" = "arm64" ]; then
         config="darwin64-arm64-cc"
@@ -138,53 +151,117 @@ openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEP
 build_autotools_dep "https://github.com/openssl/openssl.git" "openssl" "$openssl_configure"
 
 ### 4. libpng
-build_autotools_dep "https://github.com/glennrp/libpng.git" "libpng" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "" "skip"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://github.com/glennrp/libpng.git libpng"
+    cd "$SRC_DIR/libpng"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
+else
+    build_autotools_dep "https://github.com/glennrp/libpng.git" "libpng" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "" "skip"
+fi
 
 ### 5. harfbuzz
-build_meson_dep "https://github.com/harfbuzz/harfbuzz.git" "harfbuzz" "meson setup build --prefix=$DEPS_DIR --default-library=static"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    backend="--backend vs"
+else
+    backend=""
+fi
+build_meson_dep "https://github.com/harfbuzz/harfbuzz.git" "harfbuzz" "meson setup build --prefix=$DEPS_DIR --default-library=static $backend"
 
 ### 6. freetype2
-build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype" "meson setup build --prefix=$DEPS_DIR --default-library=static"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    backend="--backend vs"
+else
+    backend=""
+fi
+build_meson_dep "https://gitlab.freedesktop.org/freetype/freetype.git" "freetype" "meson setup build --prefix=$DEPS_DIR --default-library=static $backend"
 
 ### 7. fribidi
-build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    backend="--backend vs"
+else
+    backend=""
+fi
+build_meson_dep "https://github.com/fribidi/fribidi.git" "fribidi" "meson setup build --prefix=$DEPS_DIR --default-library=static -Ddocs=false $backend"
 
 ### 8. libexpat
 echo "Building libexpat"
 run_cmd "git clone https://github.com/libexpat/libexpat.git libexpat"
 cd "$SRC_DIR/libexpat/expat"
-run_cmd "./buildconf.sh"
-run_cmd "./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
-run_cmd "make -j$CPU_COUNT"
-run_cmd "make install"
-cd "$SRC_DIR"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release -EXPAT_BUILD_TOOLS=OFF -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_SHARED_LIBS=OFF"
+    run_cmd "cmake --build build --config Release --target install"
+else
+    run_cmd "./buildconf.sh"
+    run_cmd "./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+    run_cmd "make -j$CPU_COUNT"
+    run_cmd "make install"
+fi
 
 ### 9. fontconfig
 build_autotools_dep "https://gitlab.freedesktop.org/fontconfig/fontconfig.git" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" --disable-docs --disable-tests --disable-tools --disable-nls"
 
 ### 10. libass
-build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    backend="--backend vs"
+else
+    backend=""
+fi
+build_meson_dep "https://github.com/libass/libass.git" "libass" "meson setup build --prefix=$DEPS_DIR --default-library=static $backend"
 
 ### 11. libfdk-aac
-build_autotools_dep "https://github.com/mstorsjo/fdk-aac.git" "fdk-aac" "sh autogen.sh && ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://github.com/mstorsjo/fdk-aac.git fdk-aac"
+    cd "$SRC_DIR/fdk-aac"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
+else
+    build_autotools_dep "https://github.com/mstorsjo/fdk-aac.git" "fdk-aac" "sh autogen.sh && ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+fi
 
 ### 12. libmp3lame
 build_autotools_dep "https://github.com/lameproject/lame.git" "lame" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --enable-nasm --disable-gtktest --disable-frontend CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 
 ### 13. libopus
-build_autotools_dep "https://github.com/xiph/opus.git" "opus" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://github.com/xiph/opus.git opus"
+    cd "$SRC_DIR/opus"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release -DOPUS_BUILD_SHARED_LIBRARY=OFF -DOPUS_BUILD_TESTING=OFF"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
+else
+    build_autotools_dep "https://github.com/xiph/opus.git" "opus" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+fi
 
 ### 14. libogg
-build_autotools_dep "https://github.com/xiph/ogg.git" "ogg" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://github.com/xiph/ogg.git ogg"
+    cd "$SRC_DIR/ogg"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release -DINSTALL_DOCS=OFF -DBUILD_SHARED_LIBS=OFF"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
+else
+    build_autotools_dep "https://github.com/xiph/ogg.git" "ogg" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+fi
 
 ### 15. libvorbis
-# we remove `-force_cpusubtype_ALL` from configure.ac for macOS because it's no longer supported on macOS 15 (https://gitlab.xiph.org/xiph/vorbis/-/issues/2352)
-if [ "$ARTIFACT_OS" = "macOS" ]; then
-    patch_configure="sed -i '' 's/ -force_cpusubtype_ALL//g' configure.ac"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://gitlab.xiph.org/xiph/vorbis.git vorbis"
+    cd "$SRC_DIR/vorbis"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
 else
-    patch_configure=""
+    # we remove `-force_cpusubtype_ALL` from configure.ac for macOS because it's no longer supported on macOS 15 (https://gitlab.xiph.org/xiph/vorbis/-/issues/2352)
+    if [ "$ARTIFACT_OS" = "macOS" ]; then
+        patch_configure="sed -i '' 's/ -force_cpusubtype_ALL//g' configure.ac"
+    else
+        patch_configure=""
+    fi
+    build_autotools_dep "https://gitlab.xiph.org/xiph/vorbis.git" "vorbis" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --with-ogg=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "$patch_configure"
 fi
-build_autotools_dep "https://gitlab.xiph.org/xiph/vorbis.git" "vorbis" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --with-ogg=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\"" "$patch_configure"
 
 ### 16. libvpx
 build_autotools_dep "https://github.com/webmproject/libvpx.git" "libvpx" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared"
@@ -197,7 +274,7 @@ echo "Building x265"
 run_cmd "git clone https://bitbucket.org/multicoreware/x265_git.git x265"
 if [ "$ARTIFACT_OS" = "Windows" ]; then
     build_dir="build/linux"
-    cmake_cmd="cmake -G \"MSYS Makefiles\" ../../source && cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+    cmake_cmd="cmake -G \"Visual Studio 17 2022\" ../../source && cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
 elif [ "$ARTIFACT_OS" = "Linux" ] && [ "$ARCH" = "arm64" ]; then
     build_dir="build/aarch64-linux"
     cmake_cmd="cmake ../../source -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=OFF -DENABLE_SVE2=OFF -DCMAKE_INSTALL_PREFIX=$DEPS_DIR CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
@@ -227,16 +304,33 @@ run_cmd "git clone https://aomedia.googlesource.com/aom aom"
 aom_build_dir="$SRC_DIR/aom_build"
 mkdir -p "$aom_build_dir"
 cd "$aom_build_dir"
-run_cmd "cmake ../aom -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=0 -DENABLE_DOCS=0 CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" -DCMAKE_INSTALL_PREFIX=$DEPS_DIR"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "cmake ../aom -G \"Visual Studio 17 2022\" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=0 -DENABLE_DOCS=0 CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" -DCMAKE_INSTALL_PREFIX=$DEPS_DIR"
+else
+    run_cmd "cmake ../aom -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=0 -DENABLE_DOCS=0 CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\" -DCMAKE_INSTALL_PREFIX=$DEPS_DIR"
+fi
 run_cmd "cmake --build . -j$CPU_COUNT"
 run_cmd "cmake --install ."
 cd "$SRC_DIR"
 
 ### 20. libwebp
-build_autotools_dep "https://github.com/webmproject/libwebp.git" "libwebp" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    run_cmd "git clone https://github.com/webmproject/libwebp.git libwebp"
+    cd "$SRC_DIR/libwebp"
+    run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF"
+    run_cmd "cmake --build build --config Release --target install"
+    cd "$SRC_DIR"
+else
+    build_autotools_dep "https://github.com/webmproject/libwebp.git" "libwebp" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared CFLAGS=\"-fPIC\" CXXFLAGS=\"-fPIC\""
+fi
 
 ### 21. libdav1d
-build_meson_dep "https://code.videolan.org/videolan/dav1d.git" "dav1d" "meson setup build --prefix=$DEPS_DIR --default-library=static"
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    backend="--backend vs"
+else
+    backend=""
+fi
+build_meson_dep "https://code.videolan.org/videolan/dav1d.git" "dav1d" "meson setup build --prefix=$DEPS_DIR --default-library=static $backend"
 
 # Function to build FFmpeg
 build_ffmpeg() {
@@ -248,7 +342,7 @@ build_ffmpeg() {
     mkdir -p "$build_dir_version"
     run_cmd "git clone --depth 1 --branch $branch https://github.com/FFmpeg/FFmpeg.git ffmpeg-$version"
     cd "$ffmpeg_dir"
-    configure_cmd="./configure --prefix=$build_dir_version --disable-static --enable-shared --pkg-config-flags=\"--static\" --extra-cflags=\"-I$DEPS_DIR/include\" --extra-ldflags=\"-L$DEPS_DIR/lib\" --enable-gpl --enable-nonfree --enable-version3 --enable-openssl --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libdav1d --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libaom --enable-libwebp --enable-zlib --disable-autodetect"
+    configure_cmd="./configure --toolchain=msvc --prefix=$build_dir_version --disable-static --enable-shared --pkg-config-flags=\"--static\" --extra-cflags=\"-I$DEPS_DIR/include\" --extra-ldflags=\"-L$DEPS_DIR/lib\" --enable-gpl --enable-asm --enable-yasm --enable-nonfree --enable-version3 --enable-openssl --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libdav1d --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libaom --enable-libwebp --enable-zlib --disable-autodetect"
     run_cmd "$configure_cmd"
     run_cmd "make -j$CPU_COUNT"
     run_cmd "make install"
@@ -260,6 +354,12 @@ build_ffmpeg() {
 
 if [ "$ARTIFACT_OS" = "Linux" ]; then
     sudo mv /usr/lib/x86_64-linux-gnu/libfontconfig.so /usr/lib/x86_64-linux-gnu/libfontconfig.so.bak || true
+fi
+
+if [ "$ARTIFACT_OS" = "Windows" ]; then
+    if [ -f /bin/link.exe ]; then
+        sudo rm /bin/link.exe
+    fi
 fi
 
 # Build FFmpeg versions
