@@ -50,18 +50,28 @@ jobs:
         with:
           msystem: "MINGW64"
           update: true
-          install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config perl make mingw-w64-x86_64-autotools autoconf-archive libtool mingw-w64-x86_64-gperf mingw-w64-x86_64-gettext-libtextstyle mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools
+          install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config make mingw-w64-x86_64-autotools autoconf-archive libtool mingw-w64-x86_64-gperf mingw-w64-x86_64-gettext-libtextstyle mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools
 
       - name: Set perl path (Windows)
         if: matrix.os == 'windows-2022'
+        #run: |
+        #  echo "PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        #  echo "OPENSSL_SRC_PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         run: |
-          echo "PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          echo "OPENSSL_SRC_PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          choco install strawberryperl -y --force
+          # Add MSYS2 binaries to system PATH
+          echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
+          echo "C:\msys64\usr\bin" >> $GITHUB_PATH
+          echo "C:\Strawberry\perl\bin" >> $GITHUB_PATH
+          # Verify NASM installation
+          # echo "NASM path: $(where nasm)"
+          # nasm -v
 
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
+        shell: cmd
         run: |
-          & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           bash build.sh
 
       - name: Build FFmpeg Linux/macOS

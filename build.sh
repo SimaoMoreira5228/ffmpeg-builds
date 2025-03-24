@@ -38,6 +38,14 @@ esac
 export PKG_CONFIG_PATH="$DEPS_DIR/lib/pkgconfig:$DEPS_DIR/lib/aarch64-linux-gnu/pkgconfig:$DEPS_DIR/lib/x86_64-linux-gnu/pkgconfig:$DEPS_DIR/lib64/pkgconfig"
 export PKG_CONFIG="pkg-config --static"
 
+# if [ "$ARTIFACT_OS" = "Windows" ]; then
+#     # Install missing Perl module if needed
+#     run_cmd "cpan install Locale::Maketext::Simple"
+
+#     # Alternatively, you could specify the full path to Strawberry Perl if installed
+#     export PATH="/c/Strawberry/perl/bin:$PATH"
+# fi
+
 # Get CPU count
 if [ "$ARTIFACT_OS" = "macOS" ]; then
     CPU_COUNT=$(sysctl -n hw.ncpu)
@@ -63,7 +71,7 @@ build_autotools_dep() {
     skip_autogen=$5
 
     echo "Building $dir_name with Autotools"
-    run_cmd "git clone --depth 1 $repo $dir_name"
+    run_cmd "git clone $repo $dir_name"
     cd "$SRC_DIR/$dir_name"
     if [ -n "$run_before_conf_cmd" ]; then
         echo "Running pre-configure command for $dir_name"
@@ -130,25 +138,26 @@ cd "$SRC_DIR"
 
 ### 3. OpenSSL
 if [ "$ARTIFACT_OS" = "Windows" ]; then
-    #config="VC-WIN64A"
-    config="mingw64"
+    config="VC-WIN64A"
+    openssl_configure="/c/Strawberry/perl/bin/perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
 elif [ "$ARTIFACT_OS" = "macOS" ]; then
     if [ "$ARCH" = "arm64" ]; then
         config="darwin64-arm64-cc"
     else
         config="darwin64-x86_64-cc"
     fi
+    openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
 elif [ "$ARTIFACT_OS" = "Linux" ]; then
     if [ "$ARCH" = "arm64" ]; then
         config="linux-aarch64"
     else
         config="linux-x86_64"
     fi
+    openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
 else
     echo "Unsupported OS: $ARTIFACT_OS"
     exit 1
 fi
-openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
 build_autotools_dep "https://github.com/openssl/openssl.git" "openssl" "$openssl_configure"
 
 ### 4. libpng
