@@ -52,10 +52,17 @@ jobs:
           update: true
           install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config perl make mingw-w64-x86_64-autotools autoconf-archive libtool mingw-w64-x86_64-gperf mingw-w64-x86_64-gettext-libtextstyle mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools
 
+      - name: Set perl path (Windows)
+        if: matrix.os == 'windows-2022'
+        run: |
+          echo "PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          echo "OPENSSL_SRC_PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
-        shell: msys2 {0}
-        run: cmd.exe /V /C @ "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat" "&&" "bash build.sh"
+        run: |
+          & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          bash build.sh
 
       - name: Build FFmpeg Linux/macOS
         if: matrix.os != 'windows-2022'
