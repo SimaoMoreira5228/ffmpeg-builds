@@ -55,7 +55,7 @@ jobs:
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
         shell: msys2 {0}
-        run: cmd.exe /V /C @ "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat" "&&" "bash build.sh"
+        run: bash build.sh
 
       - name: Build FFmpeg Linux/macOS
         if: matrix.os != 'windows-2022'
