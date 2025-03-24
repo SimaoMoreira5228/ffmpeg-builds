@@ -130,7 +130,8 @@ cd "$SRC_DIR"
 
 ### 3. OpenSSL
 if [ "$ARTIFACT_OS" = "Windows" ]; then
-    config="VC-WIN64A"
+    #config="VC-WIN64A"
+    config="mingw64"
 elif [ "$ARTIFACT_OS" = "macOS" ]; then
     if [ "$ARCH" = "arm64" ]; then
         config="darwin64-arm64-cc"
