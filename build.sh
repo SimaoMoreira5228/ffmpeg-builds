@@ -50,12 +50,8 @@ echo "Detected ARTIFACT_OS: $ARTIFACT_OS, ARCH: $ARCH"
 
 # Helper function to run commands
 run_cmd() {
-    if [ "$ARTIFACT_OS" = "Windows" ]; then
-        cmd.exe /V /C @ "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat" "&&" "bash -c \"$1\""
-    else
-        echo "Running: $1"
-        bash -c "$1"
-    fi
+    echo "Running: $1"
+    bash -c "$1"
 }
 
 # Function to build Autotools-based dependencies
