@@ -26,6 +26,7 @@ jobs:
           - macos-15 # ARM64
     runs-on: ${{ matrix.os }}
     steps:
+      - run: git config --global core.autocrlf input
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -44,39 +45,34 @@ jobs:
         if: matrix.os == 'macos-15' || matrix.os == 'macos-13'
         run: brew install git libtool nasm yasm cmake make meson ninja pkg-config autoconf automake autogen
 
-      - name: Install dependencies (Windows)
+      - name: Set up Cygwin
         if: matrix.os == 'windows-2022'
-        uses: msys2/setup-msys2@v2
+        uses: cygwin/cygwin-install-action@master
         with:
-          msystem: "MINGW64"
-          update: true
-          install: git mingw-w64-x86_64-gcc nasm yasm mingw-w64-x86_64-cmake mingw-w64-x86_64-meson ninja pkg-config make mingw-w64-x86_64-autotools autoconf-archive libtool mingw-w64-x86_64-gperf mingw-w64-x86_64-gettext-libtextstyle mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools
+          packages: "autoconf automake libtool gperf make git dos2unix autogen gettext-devel pkg-config"
 
-      - name: Set perl path (Windows)
+      - name: Install dependencies scoop (Windows)
         if: matrix.os == 'windows-2022'
-        #run: |
-        #  echo "PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        #  echo "OPENSSL_SRC_PERL=$((where.exe perl)[0])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         run: |
-          choco install strawberryperl -y --force
-          # Add MSYS2 binaries to system PATH
-          echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
-          echo "C:\msys64\usr\bin" >> $GITHUB_PATH
-          echo "C:\Strawberry\perl\bin" >> $GITHUB_PATH
-          # Verify NASM installation
-          # echo "NASM path: $(where nasm)"
-          # nasm -v
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+          scoop install perl nasm meson ninja pkg-config dos2unix
+
+          $env:Path += ";$env:USERPROFILE\scoop\shims"
+
+          echo "$env:USERPROFILE\scoop\shims" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          bash build.sh
+          sh ./build.sh
 
-      - name: Build FFmpeg Linux/macOS
-        if: matrix.os != 'windows-2022'
-        run: bash build.sh
+      # - name: Build FFmpeg Linux/macOS
+      #   if: matrix.os != 'windows-2022'
+      #   run: bash build.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
