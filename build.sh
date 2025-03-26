@@ -83,8 +83,8 @@ build_autotools_dep() {
 
     echo "Building $dir_name with Autotools"
     echo "Checking out commit $commit for $dir_name"
-    git_clone $repo $commit "$SRC_DIR/$dir_name"
-    cd "$SRC_DIR/$dir_name"
+    git_clone $repo $commit $dir_name
+    pushd $dir_name
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         find . -type f -name "*.sh" -exec dos2unix {} \;
@@ -107,7 +107,7 @@ build_autotools_dep() {
     run_cmd "$configure_cmd || (echo 'configure failed'; exit 1)"
     run_cmd "make -j$CPU_COUNT"
     run_cmd "make install"
-    cd "$SRC_DIR"
+    popd
 }
 
 # Function to build Meson-based dependencies
@@ -119,8 +119,8 @@ build_meson_dep() {
 
     echo "Building $dir_name with Meson"
     echo "Checking out commit $commit for $dir_name"
-    git_clone $repo $commit "$SRC_DIR/$dir_name"
-    cd "$SRC_DIR/$dir_name"
+    git_clone $repo $commit $dir_name
+    pushd $dir_name
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         run_cmd "meson setup build --prefix=$DEPS_DIR --default-library=static --buildtype=release $meson_opts --backend vs"
@@ -130,7 +130,7 @@ build_meson_dep() {
 
     meson compile -C build
     meson install -C build
-    cd "$SRC_DIR"
+    popd
 }
 
 build_cmake_dep() {
@@ -142,8 +142,8 @@ build_cmake_dep() {
 
     echo "Building $dir_name with CMake"
     echo "Checking out commit $commit for $dir_name"
-    git_clone $repo $commit "$SRC_DIR/$dir_name"
-    cd "$SRC_DIR/$dir_name"
+    git_clone $repo $commit $dir_name
+    pushd $dir_name
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         find . -type f -name "*.awk" -exec dos2unix {} \;
@@ -163,7 +163,7 @@ build_cmake_dep() {
         run_cmd "cmake --build build -j$CPU_COUNT --config Release --target install"
     fi
 
-    cd "$SRC_DIR"
+    popd
 }
 
 echo "Building for $ARTIFACT_OS ($ARCH)"
@@ -194,25 +194,28 @@ build_cmake_dep "https://github.com/google/brotli.git" "ed738e842d2fbdf2d6459e39
 ### 3. OpenSSL
 if [ "$ARTIFACT_OS" = "Windows" ]; then
     config="VC-WIN64A"
-    openssl_configure="/c/Strawberry/perl/bin/perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
+    perl="/c/Strawberry/perl/bin/perl"
 elif [ "$ARTIFACT_OS" = "macOS" ]; then
     if [ "$ARCH" = "arm64" ]; then
         config="darwin64-arm64-cc"
     else
         config="darwin64-x86_64-cc"
     fi
-    openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
+    perl="perl"
 elif [ "$ARTIFACT_OS" = "Linux" ]; then
     if [ "$ARCH" = "arm64" ]; then
         config="linux-aarch64"
     else
         config="linux-x86_64"
     fi
-    openssl_configure="perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
+    perl="perl"
 else
     echo "Unsupported OS: $ARTIFACT_OS"
     exit 1
 fi
+
+openssl_configure="$perl ./Configure $config --prefix=$DEPS_DIR --openssldir=$DEPS_DIR/ssl no-shared no-docs no-tests"
+
 # check out commit 0c6656a7a31492ddd61e3d0d8b0e66645f4b2d6f refering to tag openssl-3.5.0-beta1
 # build_autotools_dep "https://github.com/openssl/openssl.git" "0c6656a7a31492ddd61e3d0d8b0e66645f4b2d6f" "openssl" "$openssl_configure"
 
@@ -230,6 +233,7 @@ fi
 #     # check out commit 872555f4ba910252783af1507f9e7fe1653be252 refering to tag v1.6.47
 #     build_autotools_dep "https://github.com/glennrp/libpng.git" "872555f4ba910252783af1507f9e7fe1653be252" "libpng" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared" "" "skip"
 # fi
+
 echo "Building libpng"
 build_cmake_dep "https://github.com/glennrp/libpng.git" "872555f4ba910252783af1507f9e7fe1653be252" "libpng" "-DPNG_SHARED=OFF -DPNG_STATIC=ON -DPNG_TESTS=OFF"
 
@@ -298,11 +302,12 @@ build_cmake_dep "https://github.com/ScuffleCloud/fdk-aac-mirror.git" "716f439464
 ### 12. libmp3lame
 run_cmd "curl -L -o lame-3.100.tar.gz https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download"
 run_cmd "tar -xzf lame-3.100.tar.gz"
-cd lame-3.100
+
+pushd lame-3.100
 run_cmd "./configure --prefix=$DEPS_DIR --enable-static --disable-shared --enable-nasm --disable-gtktest --disable-frontend"
 run_cmd "make -j$CPU_COUNT"
 run_cmd "make install"
-cd "$SRC_DIR"
+popd
 
 ### 13. libopus
 # if [ "$ARTIFACT_OS" = "Windows" ]; then
@@ -456,7 +461,7 @@ build_ffmpeg() {
     build_dir_version="$BUILD_DIR/ffmpeg-$version"
     mkdir -p "$build_dir_version"
     run_cmd "git clone --depth 1 --branch $branch https://github.com/FFmpeg/FFmpeg.git ffmpeg-$version"
-    cd "$ffmpeg_dir"
+    pushd "$ffmpeg_dir"
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         configure_cmd="./configure --toolchain=msvc --prefix=$build_dir_version --enable-static --disable-shared --pkg-config-flags=\"--static\" --extra-cflags=\"-I$DEPS_DIR/include\" --extra-ldflags=\"-L$DEPS_DIR/lib\" --enable-gpl --enable-asm --enable-yasm --enable-nonfree --enable-version3 --enable-openssl --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libdav1d --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libaom --enable-libwebp --enable-zlib --disable-autodetect"
@@ -470,7 +475,7 @@ build_ffmpeg() {
     artifact_name="ffmpeg-$version-$ARTIFACT_OS-$ARCH.tar.gz"
     echo "Creating artifact: $artifact_name"
     run_cmd "tar -czf $SRC_DIR/$artifact_name -C $build_dir_version ."
-    cd "$SRC_DIR"
+    popd
 }
 
 if [ "$ARTIFACT_OS" = "Linux" ]; then
