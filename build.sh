@@ -14,23 +14,23 @@ mkdir -p "$BUILD_DIR" "$DEPS_DIR"
 # Detect ARTIFACT_OS
 OS=$(uname -s)
 case "$OS" in
-Linux*) ARTIFACT_OS="Linux" ;;
-Darwin*) ARTIFACT_OS="macOS" ;;
-CYGWIN* | MINGW* | MSYS*) ARTIFACT_OS="Windows" ;;
-*)
-    echo "Unsupported OS: $OS"
-    exit 1
+    Linux*) ARTIFACT_OS="Linux" ;;
+    Darwin*) ARTIFACT_OS="macOS" ;;
+    CYGWIN* | MINGW* | MSYS*) ARTIFACT_OS="Windows" ;;
+    *)
+        echo "Unsupported OS: $OS"
+        exit 1
     ;;
 esac
 
 # Detect ARCH
 ARCH=$(uname -m)
 case "$ARCH" in
-x86_64 | amd64) ARCH="x86_64" ;;
-aarch64 | arm64) ARCH="arm64" ;;
-*)
-    echo "Unsupported architecture: $ARCH"
-    exit 1
+    x86_64 | amd64) ARCH="x86_64" ;;
+    aarch64 | arm64) ARCH="arm64" ;;
+    *)
+        echo "Unsupported architecture: $ARCH"
+        exit 1
     ;;
 esac
 
@@ -45,6 +45,7 @@ else
     CPU_COUNT=$(nproc)
 fi
 [ -z "$CPU_COUNT" ] && CPU_COUNT=4
+
 echo "CPU count: $CPU_COUNT"
 echo "Detected ARTIFACT_OS: $ARTIFACT_OS, ARCH: $ARCH"
 
@@ -57,6 +58,20 @@ run_cmd() {
     bash -c "$1"
 }
 
+git_clone() {
+    repo=$1
+    commit=$2
+    dir_name=$3
+    
+    mkdir -p $dir_name
+    pushd $dir_name
+    git init
+    git remote add origin $repo
+    git fetch --depth=1 origin $commit
+    git checkout $commit
+    popd
+}
+
 # Function to build Autotools-based dependencies
 build_autotools_dep() {
     repo=$1
@@ -67,13 +82,9 @@ build_autotools_dep() {
     skip_autogen=$6
 
     echo "Building $dir_name with Autotools"
-    mkdir -p "$SRC_DIR/$dir_name"
-    cd "$SRC_DIR/$dir_name"
     echo "Checking out commit $commit for $dir_name"
-    git init
-    git remote add origin $repo
-    git fetch --depth=1 origin $commit
-    git checkout $commit
+    git_clone $repo $commit "$SRC_DIR/$dir_name"
+    cd "$SRC_DIR/$dir_name"
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         find . -type f -name "*.sh" -exec dos2unix {} \;
@@ -92,6 +103,7 @@ build_autotools_dep() {
             run_cmd "sh autogen.sh || (echo 'autogen.sh failed'; exit 1)"
         fi
     fi
+
     run_cmd "$configure_cmd || (echo 'configure failed'; exit 1)"
     run_cmd "make -j$CPU_COUNT"
     run_cmd "make install"
@@ -106,18 +118,14 @@ build_meson_dep() {
     meson_opts=$4
 
     echo "Building $dir_name with Meson"
-    mkdir -p "$SRC_DIR/$dir_name"
-    cd "$SRC_DIR/$dir_name"
     echo "Checking out commit $commit for $dir_name"
-    git init
-    git remote add origin $repo
-    git fetch --depth=1 origin $commit
-    git checkout $commit
+    git_clone $repo $commit "$SRC_DIR/$dir_name"
+    cd "$SRC_DIR/$dir_name"
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
-        run_cmd "meson setup build --prefix=$DEPS_DIR --default-library=static $meson_opts --backend vs"
+        run_cmd "meson setup build --prefix=$DEPS_DIR --default-library=static --buildtype=release $meson_opts --backend vs"
     else
-        run_cmd "meson setup build --prefix=$DEPS_DIR --default-library=static $meson_opts"
+        run_cmd "meson setup build --prefix=$DEPS_DIR --default-library=static --buildtype=release $meson_opts"
     fi
 
     meson compile -C build
@@ -133,13 +141,9 @@ build_cmake_dep() {
     pre_cmake_cmd=$5
 
     echo "Building $dir_name with CMake"
-    mkdir -p "$SRC_DIR/$dir_name"
-    cd "$SRC_DIR/$dir_name"
     echo "Checking out commit $commit for $dir_name"
-    git init
-    git remote add origin $repo
-    git fetch --depth=1 origin $commit
-    git checkout $commit
+    git_clone $repo $commit "$SRC_DIR/$dir_name"
+    cd "$SRC_DIR/$dir_name"
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         find . -type f -name "*.awk" -exec dos2unix {} \;
@@ -152,13 +156,13 @@ build_cmake_dep() {
 
     if [ "$ARTIFACT_OS" = "Windows" ]; then
         pwd
-        run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR $cmake_opts"
+        run_cmd "cmake -G \"Visual Studio 17 2022\" -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release $cmake_opts"
         run_cmd "cmake --build build --config Release --target install"
     else
-        run_cmd "cmake -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR $cmake_opts"
-        run_cmd "cmake --build build -j$CPU_COUNT"
-        run_cmd "cmake --install build"
+        run_cmd "cmake -B build -DCMAKE_INSTALL_PREFIX=$DEPS_DIR -DCMAKE_BUILD_TYPE=Release $cmake_opts"
+        run_cmd "cmake --build build -j$CPU_COUNT --config Release --target install"
     fi
+
     cd "$SRC_DIR"
 }
 
@@ -269,7 +273,7 @@ fi
 ### 9. fontconfig
 # check out commit fdfc3445d1cc9c1c7e587fb2a1287871de16faf9 refering to tag 2.16.1
 # build_autotools_dep "https://github.com/ScuffleCloud/fontconfig-mirror.git" "fdfc3445d1cc9c1c7e587fb2a1287871de16faf9" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --disable-docs --disable-tests --disable-tools --disable-nls --target=msvc"
-build_meson_dep "https://github.com/ScuffleCloud/fontconfig-mirror.git" "f511346fe16f205f087a97faf32d3c7d07d5b3c8" "fontconfig"
+build_meson_dep "https://github.com/ScuffleCloud/fontconfig-mirror.git" "f511346fe16f205f087a97faf32d3c7d07d5b3c8" "fontconfig" "-Ddocs=false -Dtests=false -Dtools=false -Dnls=false"
 
 ### 10. libass
 # check out commit e46aedea0a0d17da4c4ef49d84b94a7994664ab5 refering to tag 0.17.3
