@@ -277,7 +277,7 @@ fi
 ### 9. fontconfig
 # check out commit fdfc3445d1cc9c1c7e587fb2a1287871de16faf9 refering to tag 2.16.1
 # build_autotools_dep "https://github.com/ScuffleCloud/fontconfig-mirror.git" "fdfc3445d1cc9c1c7e587fb2a1287871de16faf9" "fontconfig" "sh ./configure --prefix=$DEPS_DIR --enable-static --disable-shared --disable-docs --disable-tests --disable-tools --disable-nls --target=msvc"
-build_meson_dep "https://github.com/ScuffleCloud/fontconfig-mirror.git" "f511346fe16f205f087a97faf32d3c7d07d5b3c8" "fontconfig" "-Ddoc=false -Dtests=false -Dtools=false"
+build_meson_dep "https://github.com/ScuffleCloud/fontconfig-mirror.git" "f511346fe16f205f087a97faf32d3c7d07d5b3c8" "fontconfig" "-Ddoc=disabled -Dtests=disabled -Dtools=disabled"
 
 ### 10. libass
 # check out commit e46aedea0a0d17da4c4ef49d84b94a7994664ab5 refering to tag 0.17.3
