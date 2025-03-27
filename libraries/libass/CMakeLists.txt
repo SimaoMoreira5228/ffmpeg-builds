@@ -38,6 +38,7 @@ ExternalProject_Add(libass
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
+        --
         ${MESON_BIN} setup ${LIBASS_BINARY_DIR}
         --prefix=${LIBASS_INSTALL_DIR}
         --optimization=3

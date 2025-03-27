@@ -67,6 +67,7 @@ ExternalProject_Add(ffmpeg
     LOG_OUTPUT_ON_FAILURE ON
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
+        --
         ${BASH_BIN} ./configure
         "--extra-libs=-lmp3lame -lpthread -lm"
         "--extra-cflags=-I$<TARGET_PROPERTY:libmp3lame,INCLUDE_DIRECTORY>"
