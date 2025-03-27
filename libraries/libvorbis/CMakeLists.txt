@@ -34,4 +34,5 @@ set_target_properties(libvorbis PROPERTIES
   LIBRARY_DIRECTORY ${libvorbis_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libvorbis_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libvorbis_INSTALL_DIR}/lib/pkgconfig
+  CMAKE_MODULE_PATH ${libvorbis_INSTALL_DIR}/lib/cmake/Vorbis
 )

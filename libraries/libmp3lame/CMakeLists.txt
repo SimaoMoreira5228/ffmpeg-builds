@@ -44,4 +44,7 @@ set_target_properties(libmp3lame PROPERTIES
     INCLUDE_DIRECTORY ${libmp3lame_INSTALL_DIR}/include
     LIBRARY_DIRECTORY ${libmp3lame_INSTALL_DIR}/lib
     PKG_CONFIG_PATH ${libmp3lame_INSTALL_DIR}/lib/pkgconfig
+    CFLAGS "-I${libmp3lame_INSTALL_DIR}/include"
+    CXXFLAGS "-I${libmp3lame_INSTALL_DIR}/include"
+    LDFLAGS "-L${libmp3lame_INSTALL_DIR}/lib -lmp3lame"
 )

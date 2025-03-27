@@ -12,6 +12,8 @@ add_external_target(libpng
     -DPNG_SHARED=OFF
     -DPNG_STATIC=ON
     -DPNG_TESTS=OFF
+    -DZLIB_INCLUDE_DIR=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
+    -DZLIB_LIBRARY=$<TARGET_PROPERTY:zlib,LIBRARY_FILE>
     <SOURCE_DIR>
   BUILD_COMMAND ${CMAKE_COMMAND}
     --build .
@@ -24,4 +26,5 @@ set_target_properties(libpng PROPERTIES
   LIBRARY_DIRECTORY ${libpng_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libpng_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libpng_INSTALL_DIR}/lib/pkgconfig
+  CMAKE_MODULE_PATH ${libpng_INSTALL_DIR}/lib/cmake/PNG
 )

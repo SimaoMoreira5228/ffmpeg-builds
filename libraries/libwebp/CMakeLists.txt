@@ -29,4 +29,5 @@ set_target_properties(libwebp PROPERTIES
   LIBRARY_DIRECTORY ${libwebp_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libwebp_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libwebp_INSTALL_DIR}/lib/pkgconfig
+  CMAKE_MODULE_PATH ${libwebp_INSTALL_DIR}/share/WebP/cmake
 )

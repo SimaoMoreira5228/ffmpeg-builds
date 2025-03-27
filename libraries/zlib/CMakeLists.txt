@@ -28,4 +28,5 @@ set_target_properties(zlib PROPERTIES
   LIBRARY_DIRECTORY ${zlib_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${zlib_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${zlib_INSTALL_DIR}/share/pkgconfig
+  LIBRARY_FILE ${zlib_INSTALL_DIR}/lib/libz.${STATIC_LIBRARY_EXTENSION}
 )

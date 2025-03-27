@@ -13,20 +13,23 @@ add_external_target(
     -DBUILD_SHARED_LIBS=OFF
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     -DFT_REQUIRE_ZLIB=ON
+    -DFT_REQUIRE_PNG=ON
+    -DFT_REQUIRE_BROTLI=ON
     -DFT_DISABLE_BZIP2=ON
-    -DFT_DISABLE_PNG=ON
     -DFT_DISABLE_HARFBUZZ=ON
-    -DFT_DISABLE_BROTLI=ON
+    -DZLIB_INCLUDE_DIR=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
+    -DZLIB_LIBRARY=$<TARGET_PROPERTY:zlib,LIBRARY_FILE>
     <SOURCE_DIR>
   BUILD_COMMAND ${CMAKE_COMMAND}
     --build .
     --target install
     --config ${CMAKE_BUILD_TYPE}
-  DEPENDS zlib
+  DEPENDS zlib libpng libbrotli
 )
 
 set_target_properties(libfreetype PROPERTIES
   LIBRARY_DIRECTORY ${libfreetype_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libfreetype_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libfreetype_INSTALL_DIR}/lib/pkgconfig
+  CMAKE_MODULE_PATH ${libfreetype_INSTALL_DIR}/lib/cmake/freetype
 )

@@ -22,7 +22,7 @@ set(FFMPEG_DEPENDENCIES
 
 set(FFMPEG_EXTRA_CONFIG_ARGS "")
 foreach(dependency IN LISTS FFMPEG_DEPENDENCIES)
-    list(APPEND FFMPEG_DEPENDENCY_ARGS "--enable-${dependency}")
+    list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--enable-${dependency}")
 endforeach()
 
 find_program(BASH_BIN bash)
@@ -31,14 +31,16 @@ if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--enable-x86asm")
 endif()
 
+if(WIN32)
+    list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--arch=x86_64" "--target-os=win64" "--toolchain=msvc")
+endif()
+
 add_external_target(ffmpeg
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
     GIT_TAG ${FFMPEG_TAG}
     BUILD_IN_SOURCE TRUE
     CONFIGURE_COMMAND ${BASH_BIN} ./configure
-        "--extra-libs=-lmp3lame -lpthread -lm"
-        "--extra-cflags=-I$<TARGET_PROPERTY:libmp3lame,INCLUDE_DIRECTORY>"
-        "--extra-ldflags=-L$<TARGET_PROPERTY:libmp3lame,LIBRARY_DIRECTORY>"
+        "--extra-libs=-lpthread -lm"
         --prefix=<INSTALL_DIR>
         --disable-static
         --enable-shared
