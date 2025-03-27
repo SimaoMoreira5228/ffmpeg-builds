@@ -40,7 +40,7 @@ function(add_external_target TARGET)
         if(TARGET ${DEPEND} AND $<TARGET_PROPERTY:${DEPEND},PKG_CONFIG_PATH>)
             file(TO_CMAKE_PATH $<TARGET_PROPERTY:${DEPEND},PKG_CONFIG_PATH> DEPEND_PKG_CONFIG_PATH)
             foreach(DEPEND_PKG_CONFIG_PATH_ITEM ${DEPEND_PKG_CONFIG_PATH})
-                list(APPEND ENV_ARGS "--modify" "path_list_prepend:PKG_CONFIG_PATH=${DEPEND_PKG_CONFIG_PATH_ITEM}")
+                list(APPEND EXTERNAL_ENV_ARGS "--modify" "PKG_CONFIG_PATH=path_list_prepend:${DEPEND_PKG_CONFIG_PATH_ITEM}")
             endforeach()
         endif()
     endforeach()
@@ -109,15 +109,15 @@ function(add_external_target TARGET)
         LOG_OUTPUT_ON_FAILURE ON
         BUILD_IN_SOURCE ${EXTERNAL_BUILD_IN_SOURCE}
         CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
-            ${ENV_ARGS}
+            ${EXTERNAL_ENV_ARGS}
             --
             ${EXTERNAL_CONFIGURE_COMMAND}
         BUILD_COMMAND ${CMAKE_COMMAND} -E env
-            ${ENV_ARGS}
+            ${EXTERNAL_ENV_ARGS}
             --
             ${EXTERNAL_BUILD_COMMAND}
         INSTALL_COMMAND ${CMAKE_COMMAND} -E env
-            ${ENV_ARGS}
+            ${EXTERNAL_ENV_ARGS}
             --
             ${EXTERNAL_INSTALL_COMMAND}
         DEPENDS ${EXTERNAL_DEPENDS}

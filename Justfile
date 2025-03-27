@@ -1,4 +1,4 @@
-export PKG_CONFIG := "pkg-config --static"
+export PKG_CONFIG := "pkg-config --static --define-prefix"
 
 build tag="master":
     cmake -GNinja -B build -DCMAKE_INSTALL_PREFIX=./install/{{tag}} -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG={{tag}}
