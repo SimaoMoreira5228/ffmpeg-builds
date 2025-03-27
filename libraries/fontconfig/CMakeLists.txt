@@ -13,12 +13,14 @@ set(FONTCONFIG_BINARY_DIR ${FONTCONFIG_PREFIX}/build)
 find_program(MESON_BIN meson)
 
 if(WIN32)
-    set(PATH_SEPARATOR ";")
+    file(TO_CMAKE_PATH "$ENV{PATH}" PATH_ENV)
+    file(TO_CMAKE_PATH "$<TARGET_PROPERTY:gperf,PATH>" GPERF_PATH)
+    set(PATH_WITH_ADDITION "${GPERF_PATH};${PATH_ENV}")
 else()
-    set(PATH_SEPARATOR ":")
+    set(PATH_WITH_ADDITION "$<TARGET_PROPERTY:gperf,PATH>:$ENV{PATH}")
 endif()
 
-set(PATH_WITH_ADDITION "$<TARGET_PROPERTY:gperf,PATH>${PATH_SEPARATOR}$ENV{PATH}")
+set(PATH_WITH_ADDITION "$<TARGET_PROPERTY:gperf,PATH>${PATH_SEPARATOR}${PATH_ENV}")
 
 ExternalProject_Add(fontconfig
     GIT_REPOSITORY https://github.com/ScuffleCloud/fontconfig-mirror.git
