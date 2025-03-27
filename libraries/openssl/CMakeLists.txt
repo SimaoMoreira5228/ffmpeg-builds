@@ -51,7 +51,6 @@ ExternalProject_Add(openssl
             no-tests
             zlib
             -fPIC
-            -static
             --with-zlib-include=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
             --with-zlib-lib=$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>
     BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
