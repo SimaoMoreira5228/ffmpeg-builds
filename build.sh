@@ -21,6 +21,8 @@ esac
 
 if [ "$OS" = "Darwin" ]; then
     CPU_COUNT=$(sysctl -n hw.ncpu)
+    MACOS_VERSION=$(sw_vers -productVersion)
+    MACOSX_DEPLOYMENT_TARGET=$(echo "$MACOS_VERSION" | cut -d '.' -f 1,2)
 else
     CPU_COUNT=$(nproc)
 fi
@@ -31,7 +33,7 @@ function build_ffmpeg() {
     local tar_name="ffmpeg-$tag-$OS-$ARCH"
     echo "::group::Building ffmpeg $tag"
 
-    cmake -G${cmake_generator} -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag
+    cmake -G"${cmake_generator}" -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag
     cmake --build build --config Release --parallel ${CPU_COUNT} --target install
 
     mkdir -p tmp/$tar_name
