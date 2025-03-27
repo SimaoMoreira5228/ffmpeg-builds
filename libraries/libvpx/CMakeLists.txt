@@ -10,6 +10,8 @@ set(LIBVPX_STAMP_DIR ${LIBVPX_PREFIX}/stamp)
 set(LIBVPX_LOG_DIR ${LIBVPX_PREFIX}/log)
 set(LIBVPX_BINARY_DIR ${LIBVPX_PREFIX}/build)
 
+find_program(BASH_BIN bash)
+
 ExternalProject_Add(libvpx
     GIT_REPOSITORY https://github.com/webmproject/libvpx.git
     GIT_TAG 39e8b9dcd4696d9ac3ebd4722e012488382f1adb # v1.15.1-rc1
@@ -27,7 +29,7 @@ ExternalProject_Add(libvpx
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ${BASH} ./configure
+    CONFIGURE_COMMAND ${BASH_BIN} ./configure
         --prefix=${LIBVPX_INSTALL_DIR}
         --disable-shared
         --enable-static
@@ -40,7 +42,7 @@ ExternalProject_Add(libvpx
         --enable-vp8
         --enable-vp9
         --enable-multithread
-    BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL}
+    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
 )
 

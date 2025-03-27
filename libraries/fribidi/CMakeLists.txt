@@ -10,6 +10,8 @@ set(FRIBIDI_STAMP_DIR ${FRIBIDI_PREFIX}/stamp)
 set(FRIBIDI_LOG_DIR ${FRIBIDI_PREFIX}/log)
 set(FRIBIDI_BINARY_DIR ${FRIBIDI_PREFIX}/build)
 
+find_program(MESON_BIN meson)
+
 ExternalProject_Add(fribidi
     GIT_REPOSITORY https://github.com/fribidi/fribidi.git
     GIT_TAG 68162babff4f39c4e2dc164a5e825af93bda9983 # v1.0.16
@@ -27,7 +29,7 @@ ExternalProject_Add(fribidi
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ${MESON} setup ${FRIBIDI_BINARY_DIR}
+    CONFIGURE_COMMAND ${MESON_BIN} setup ${FRIBIDI_BINARY_DIR}
         --prefix=${FRIBIDI_INSTALL_DIR}
         --optimization=3
         --prefer-static
@@ -37,8 +39,8 @@ ExternalProject_Add(fribidi
         -Ddocs=false
         -Dtests=false
         -Dbin=false
-    BUILD_COMMAND ${MESON} compile -C ${FRIBIDI_BINARY_DIR}
-    INSTALL_COMMAND ${MESON} install -C ${FRIBIDI_BINARY_DIR}
+    BUILD_COMMAND ${MESON_BIN} compile -C ${FRIBIDI_BINARY_DIR}
+    INSTALL_COMMAND ${MESON_BIN} install -C ${FRIBIDI_BINARY_DIR}
 )
 
 set_target_properties(fribidi PROPERTIES

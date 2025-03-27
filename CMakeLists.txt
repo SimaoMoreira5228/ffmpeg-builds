@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.27)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
@@ -8,11 +8,7 @@ project(ffmpeg-static-build)
 
 set(FFMPEG_STATIC_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(MESON "meson" CACHE STRING "Path to meson executable")
-set(BASH "bash" CACHE STRING "Path to bash executable")
-set(PERL "perl" CACHE STRING "Path to perl executable")
 set(FFMPEG_TAG "master" CACHE STRING "FFmpeg tag to build")
-set(CMAKE_BUILD_PARALLEL_LEVEL 16 CACHE STRING "Number of parallel build jobs")
 
 add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
 add_subdirectory(libraries/fribidi EXCLUDE_FROM_ALL)

@@ -20,11 +20,11 @@ jobs:
     strategy:
       matrix:
         os:
-          # - ubuntu-22.04
-          # - ubuntu-22.04-arm
+          - ubuntu-22.04
+          - ubuntu-22.04-arm
           - windows-2022
-          # - macos-13 # x86_64
-          # - macos-15 # ARM64
+          - macos-13 # x86_64
+          - macos-15 # ARM64
     runs-on: ${{ matrix.os }}
     steps:
       - run: git config --global core.autocrlf input
@@ -33,47 +33,29 @@ jobs:
 
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm'
-        # Using meson from pip because the version in the Ubuntu 22.04 repository is too old
         run: |
-          sudo apt-get update && sudo apt-get install -y git build-essential nasm yasm cmake ninja-build pkg-config gcc-12 g++-12 libtool autoconf automake autopoint gperf gettext
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 120
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 120
-          sudo update-alternatives --config gcc
-          sudo update-alternatives --config g++
+          sudo apt-get update && sudo apt-get install -y git build-essential nasm yasm make cmake ninja-build pkg-config
           pip3 install --user meson
 
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-15' || matrix.os == 'macos-13'
-        run: brew install git libtool nasm yasm cmake make meson ninja pkg-config autoconf automake autogen
+        run: brew install git nasm yasm cmake make meson ninja pkg-config
 
-      - name: Set up Cygwin
-        if: matrix.os == 'windows-2022'
-        uses: cygwin/cygwin-install-action@master
+      - uses: MinoruSekine/setup-scoop@v4.0.1
+        if: runner.os == 'Windows'
         with:
-          packages: "autoconf automake libtool gperf make git dos2unix autogen gettext-devel pkg-config"
-
-      - name: Install dependencies scoop (Windows)
-        if: matrix.os == 'windows-2022'
-        run: |
-          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-
-          scoop install perl nasm meson ninja pkg-config dos2unix
-
-          $env:Path += ";$env:USERPROFILE\scoop\shims"
-
-          echo "$env:USERPROFILE\scoop\shims" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+          apps: perl nasm meson ninja pkg-config git make
 
       - name: Build FFmpeg Windows
         if: matrix.os == 'windows-2022'
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          sh ./build.sh
+          bash build.sh
 
-      # - name: Build FFmpeg Linux/macOS
-      #   if: matrix.os != 'windows-2022'
-      #   run: bash build.sh
+      - name: Build FFmpeg Linux/macOS
+        if: matrix.os != 'windows-2022'
+        run: bash build.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

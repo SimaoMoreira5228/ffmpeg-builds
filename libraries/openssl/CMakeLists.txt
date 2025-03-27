@@ -24,6 +24,7 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+find_program(PERL_BIN perl)
 
 ExternalProject_Add(openssl
     GIT_REPOSITORY https://github.com/openssl/openssl.git
@@ -42,7 +43,7 @@ ExternalProject_Add(openssl
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ${PERL} ./Configure ${OPENSSL_CONFIG}
+    CONFIGURE_COMMAND ${PERL_BIN} ./Configure ${OPENSSL_CONFIG}
             --prefix=${OPENSSL_INSTALL_DIR}
             --openssldir=${OPENSSL_INSTALL_DIR}/ssl
             no-shared
@@ -53,7 +54,7 @@ ExternalProject_Add(openssl
             -static
             --with-zlib-include=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
             --with-zlib-lib=$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>
-    BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL}
+    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
     DEPENDS zlib
 )

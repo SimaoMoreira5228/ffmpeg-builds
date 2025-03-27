@@ -10,11 +10,12 @@ set(LIBMP3LAME_STAMP_DIR ${LIBMP3LAME_PREFIX}/stamp)
 set(LIBMP3LAME_LOG_DIR ${LIBMP3LAME_PREFIX}/log)
 set(LIBMP3LAME_BINARY_DIR ${LIBMP3LAME_PREFIX}/build)
 
-# https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
+find_program(BASH_BIN bash)
 
 ExternalProject_Add(libmp3lame
     URL https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
     URL_HASH SHA256=ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e
+    DOWNLOAD_NO_PROGRESS TRUE
     PREFIX ${LIBMP3LAME_PREFIX}
     TMP_DIR ${LIBMP3LAME_TMP_DIR}
     STAMP_DIR ${LIBMP3LAME_STAMP_DIR}
@@ -29,7 +30,7 @@ ExternalProject_Add(libmp3lame
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ${BASH} ./configure
+    CONFIGURE_COMMAND ${BASH_BIN} ./configure
             --prefix=${LIBMP3LAME_INSTALL_DIR}
             --enable-static
             --disable-shared
@@ -37,7 +38,7 @@ ExternalProject_Add(libmp3lame
             --disable-gtktest
             --disable-frontend
             --with-pic
-    BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL}
+    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
     DEPENDS zlib
 )
@@ -62,6 +63,7 @@ ExternalProject_Add_Step(
     DEPENDS ${LIBMP3LAME_PKG_OUTPUT_FILE}
     COMMENT "Generating libmp3lame.pc"
 )
+
 set_target_properties(libmp3lame PROPERTIES
     IMPORTED_LOCATION ${LIBMP3LAME_INSTALL_DIR}/lib/libmp3lame.a
     INTERFACE_INCLUDE_DIRECTORIES ${LIBMP3LAME_INSTALL_DIR}/include

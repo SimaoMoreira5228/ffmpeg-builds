@@ -17,6 +17,8 @@ endforeach()
 
 list(JOIN DEPENDENCIES_PKG_CONFIG_PATH ":" PKG_CONFIG_PATH)
 
+find_program(MESON_BIN meson)
+
 ExternalProject_Add(libass
     GIT_REPOSITORY https://github.com/libass/libass.git
     GIT_TAG e46aedea0a0d17da4c4ef49d84b94a7994664ab5
@@ -36,7 +38,7 @@ ExternalProject_Add(libass
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
-        ${MESON} setup ${LIBASS_BINARY_DIR}
+        ${MESON_BIN} setup ${LIBASS_BINARY_DIR}
         --prefix=${LIBASS_INSTALL_DIR}
         --optimization=3
         --prefer-static
@@ -45,8 +47,8 @@ ExternalProject_Add(libass
         --default-library=static
         -Dtest=false
         -Dlibunibreak=disabled
-    BUILD_COMMAND ${MESON} compile -C ${LIBASS_BINARY_DIR}
-    INSTALL_COMMAND ${MESON} install -C ${LIBASS_BINARY_DIR}
+    BUILD_COMMAND ${MESON_BIN} compile -C ${LIBASS_BINARY_DIR}
+    INSTALL_COMMAND ${MESON_BIN} install -C ${LIBASS_BINARY_DIR}
     DEPENDS ${DEPENDENCIES}
 )
 

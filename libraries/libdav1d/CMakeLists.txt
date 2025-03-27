@@ -10,6 +10,8 @@ set(LIBDAV1D_STAMP_DIR ${LIBDAV1D_PREFIX}/stamp)
 set(LIBDAV1D_LOG_DIR ${LIBDAV1D_PREFIX}/log)
 set(LIBDAV1D_BINARY_DIR ${LIBDAV1D_PREFIX}/build)
 
+find_program(MESON_BIN meson)
+
 ExternalProject_Add(libdav1d
     GIT_REPOSITORY https://github.com/videolan/dav1d.git
     GIT_TAG 42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa
@@ -27,7 +29,7 @@ ExternalProject_Add(libdav1d
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ${MESON} setup ${LIBDAV1D_BINARY_DIR}
+    CONFIGURE_COMMAND ${MESON_BIN} setup ${LIBDAV1D_BINARY_DIR}
         --prefix=${LIBDAV1D_INSTALL_DIR}
         --optimization=3
         --prefer-static
@@ -36,8 +38,8 @@ ExternalProject_Add(libdav1d
         --default-library=static
         -Denable_tools=false
         -Denable_tests=false
-    BUILD_COMMAND ${MESON} compile -C ${LIBDAV1D_BINARY_DIR}
-    INSTALL_COMMAND ${MESON} install -C ${LIBDAV1D_BINARY_DIR}
+    BUILD_COMMAND ${MESON_BIN} compile -C ${LIBDAV1D_BINARY_DIR}
+    INSTALL_COMMAND ${MESON_BIN} install -C ${LIBDAV1D_BINARY_DIR}
 )
 
 set_target_properties(libdav1d PROPERTIES

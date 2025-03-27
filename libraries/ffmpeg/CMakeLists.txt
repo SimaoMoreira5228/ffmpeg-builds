@@ -1,6 +1,7 @@
 project(ffmpeg)
 
 include(ExternalProject)
+include(GNUInstallDirs)
 
 set(FFMPEG_PREFIX ${CMAKE_BINARY_DIR}/_deps/ffmpeg)
 set(FFMPEG_INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/ffmpeg)
@@ -42,6 +43,8 @@ list(APPEND FFMPEG_DEPENDENCIES_PKG_CONFIG_PATH "$<TARGET_PROPERTY:libexpat,PKG_
 
 list(JOIN FFMPEG_DEPENDENCIES_PKG_CONFIG_PATH ":" PKG_CONFIG_PATH)
 
+find_program(BASH_BIN bash)
+
 ExternalProject_Add(ffmpeg
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
     GIT_TAG ${FFMPEG_TAG}
@@ -58,10 +61,9 @@ ExternalProject_Add(ffmpeg
     LOG_INSTALL ON
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
-    UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
-        ${BASH} ./configure
+        ${BASH_BIN} ./configure
         "--extra-libs=-lmp3lame -lpthread -lm"
         "--extra-cflags=-I$<TARGET_PROPERTY:libmp3lame,INCLUDE_DIRECTORY>"
         "--extra-ldflags=-L$<TARGET_PROPERTY:libmp3lame,LIBRARY_DIRECTORY>"
@@ -77,8 +79,28 @@ ExternalProject_Add(ffmpeg
         --enable-openssl
         ${FFMPEG_DEPENDENCY_ARGS}
         --disable-autodetect
-    BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL}
+    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
     DEPENDS ${FFMPEG_DEPENDENCIES}
 )
 
+ExternalProject_Add_Step(
+    ffmpeg
+    set_tools_rpath
+    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${FFMPEG_INSTALL_DIR}/bin/* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/set_rpath.cmake
+    DEPENDEES install
+    COMMENT "Setting tools rpath"
+)
+
+ExternalProject_Add_Step(
+    ffmpeg
+    set_libs_rpath
+    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${FFMPEG_INSTALL_DIR}/lib/* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/set_rpath.cmake
+    DEPENDEES install
+    COMMENT "Setting libraries rpath"
+)
+
+install(DIRECTORY ${FFMPEG_INSTALL_DIR}/bin/ DESTINATION ${CMAKE_INSTALL_BINDIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY ${FFMPEG_INSTALL_DIR}/lib/ DESTINATION ${CMAKE_INSTALL_LIBDIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY ${FFMPEG_INSTALL_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY ${FFMPEG_INSTALL_DIR}/share/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR} USE_SOURCE_PERMISSIONS)

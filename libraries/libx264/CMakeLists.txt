@@ -10,6 +10,8 @@ set(LIBX264_STAMP_DIR ${LIBX264_PREFIX}/stamp)
 set(LIBX264_LOG_DIR ${LIBX264_PREFIX}/log)
 set(LIBX264_BINARY_DIR ${LIBX264_PREFIX}/build)
 
+find_program(BASH_BIN bash)
+
 ExternalProject_Add(libx264
     GIT_REPOSITORY https://github.com/ScuffleCloud/x264-mirror.git
     GIT_TAG 0e48d072c28b6e5283d94109391f8efbb52593f2 # v1.15.1-rc1
@@ -27,14 +29,13 @@ ExternalProject_Add(libx264
     LOG_BUILD ON
     LOG_OUTPUT_ON_FAILURE ON
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND 
-        ${BASH} ./configure
+    CONFIGURE_COMMAND ${BASH_BIN} ./configure
         --prefix=${LIBX264_INSTALL_DIR}
         --enable-static
         --disable-opencl
         --disable-bashcompletion
         --enable-pic
-    BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL}
+    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
 )
 

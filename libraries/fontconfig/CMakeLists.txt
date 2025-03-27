@@ -10,6 +10,8 @@ set(FONTCONFIG_STAMP_DIR ${FONTCONFIG_PREFIX}/stamp)
 set(FONTCONFIG_LOG_DIR ${FONTCONFIG_PREFIX}/log)
 set(FONTCONFIG_BINARY_DIR ${FONTCONFIG_PREFIX}/build)
 
+find_program(MESON_BIN meson)
+
 ExternalProject_Add(fontconfig
     GIT_REPOSITORY https://github.com/ScuffleCloud/fontconfig-mirror.git
     GIT_TAG f511346fe16f205f087a97faf32d3c7d07d5b3c8 # v2.16.1
@@ -29,8 +31,7 @@ ExternalProject_Add(fontconfig
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=$<TARGET_PROPERTY:libexpat,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libpng,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:zlib,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libfreetype,PKG_CONFIG_PATH>
-        --
-        ${MESON} setup ${FONTCONFIG_BINARY_DIR}
+        ${MESON_BIN} setup ${FONTCONFIG_BINARY_DIR}
         --prefix=${FONTCONFIG_INSTALL_DIR}
         --optimization=3
         --prefer-static
@@ -40,8 +41,8 @@ ExternalProject_Add(fontconfig
         -Ddoc=disabled
         -Dtests=disabled
         -Dtools=disabled
-    BUILD_COMMAND ${MESON} compile -C ${FONTCONFIG_BINARY_DIR}
-    INSTALL_COMMAND ${MESON} install -C ${FONTCONFIG_BINARY_DIR}
+    BUILD_COMMAND ${MESON_BIN} compile -C ${FONTCONFIG_BINARY_DIR}
+    INSTALL_COMMAND ${MESON_BIN} install -C ${FONTCONFIG_BINARY_DIR}
     DEPENDS libexpat libpng zlib libfreetype
 )
 
