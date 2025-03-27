@@ -49,9 +49,9 @@ jobs:
 
       - name: Save Path
         if: runner.os == 'Windows'
-        shell: bash
+        shell: cmd
         run: |
-          echo "BACK_PATH=$PATH" >> $GITHUB_ENV
+          echo BACKUP_PATH=%PATH%>> %GITHUB_ENV%
 
       - uses: MinoruSekine/setup-scoop@v4.0.1
         if: runner.os == 'Windows'
@@ -63,7 +63,7 @@ jobs:
         shell: cmd
         run: |
           set "ORIGINAL_PATH=%PATH%"
-          set "PATH=%BACK_PATH%"
+          set "PATH=%BACKUP_PATH%"
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           set "PATH=%PATH%;%ORIGINAL_PATH%"
           bash build.sh
