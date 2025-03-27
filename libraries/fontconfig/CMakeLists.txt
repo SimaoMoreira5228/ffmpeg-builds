@@ -35,7 +35,6 @@ ExternalProject_Add(fontconfig
         ${MESON_BIN} setup ${FONTCONFIG_BINARY_DIR}
         --prefix=${FONTCONFIG_INSTALL_DIR}
         --optimization=3
-        --prefer-static
         --libdir=lib
         --buildtype=release
         --default-library=static

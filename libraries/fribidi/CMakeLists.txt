@@ -32,7 +32,6 @@ ExternalProject_Add(fribidi
     CONFIGURE_COMMAND ${MESON_BIN} setup ${FRIBIDI_BINARY_DIR}
         --prefix=${FRIBIDI_INSTALL_DIR}
         --optimization=3
-        --prefer-static
         --libdir=lib
         --buildtype=release
         --default-library=static

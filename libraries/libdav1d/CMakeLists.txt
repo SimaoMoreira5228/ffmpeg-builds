@@ -32,7 +32,6 @@ ExternalProject_Add(libdav1d
     CONFIGURE_COMMAND ${MESON_BIN} setup ${LIBDAV1D_BINARY_DIR}
         --prefix=${LIBDAV1D_INSTALL_DIR}
         --optimization=3
-        --prefer-static
         --libdir=lib
         --buildtype=release
         --default-library=static

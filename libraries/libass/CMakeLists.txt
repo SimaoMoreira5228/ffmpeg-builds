@@ -42,7 +42,6 @@ ExternalProject_Add(libass
         ${MESON_BIN} setup ${LIBASS_BINARY_DIR}
         --prefix=${LIBASS_INSTALL_DIR}
         --optimization=3
-        --prefer-static
         --libdir=lib
         --buildtype=release
         --default-library=static
