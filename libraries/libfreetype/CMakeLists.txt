@@ -23,7 +23,9 @@ add_external_target(
     -DFT_DISABLE_HARFBUZZ=ON
     -DZLIB_INCLUDE_DIR=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
     -DZLIB_LIBRARY=$<TARGET_PROPERTY:zlib,LIBRARY_FILE>
-    -DPNG_INCLUDE_DIR=$<TARGET_PROPERTY:libpng,INCLUDE_DIRECTORY>
+    # Freetype build system expects a much older version of libpng
+    # so the FindPNG.cmake doesn't work.
+    -DPNG_PNG_INCLUDE_DIR=$<TARGET_PROPERTY:libpng,INCLUDE_DIRECTORY>
     -DPNG_LIBRARY=$<TARGET_PROPERTY:libpng,LIBRARY_FILE>
     <SOURCE_DIR>
   BUILD_COMMAND ${CMAKE_COMMAND}
