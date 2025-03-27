@@ -53,14 +53,14 @@ jobs:
         run: |
           echo BACKUP_PATH=%PATH%>> %GITHUB_ENV%
 
-      - uses: MinoruSekine/setup-scoop@v4.0.1
-        if: runner.os == 'Windows'
-        with:
-          apps: perl nasm meson ninja pkg-config git make
-
       - uses: ilammy/msvc-dev-cmd@v1
         name: Setup MSVC
         if: runner.os == 'Windows'
+
+      - uses: MinoruSekine/setup-scoop@v4.0.1
+        if: runner.os == 'Windows'
+        with:
+          apps: perl nasm meson ninja pkg-config cmake make
 
       - name: Build FFmpeg
         run: bash build.sh

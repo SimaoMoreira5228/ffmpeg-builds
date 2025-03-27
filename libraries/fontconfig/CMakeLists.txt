@@ -13,7 +13,7 @@ set(FONTCONFIG_BINARY_DIR ${FONTCONFIG_PREFIX}/build)
 find_program(MESON_BIN meson)
 
 if(APPLE)
-    set(MESON_EXTRA_ARGS "--linker-args='-framework CoreFoundation -liconv'")
+    set(MESON_EXTRA_ARGS "LD_FLAGS=-framework CoreFoundation -liconv")
 endif()
 
 ExternalProject_Add(fontconfig
@@ -35,6 +35,7 @@ ExternalProject_Add(fontconfig
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=$<TARGET_PROPERTY:libexpat,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libpng,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:zlib,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libfreetype,PKG_CONFIG_PATH>
+        ${MESON_EXTRA_ARGS}
         ${MESON_BIN} setup ${FONTCONFIG_BINARY_DIR}
         --prefix=${FONTCONFIG_INSTALL_DIR}
         --optimization=3
@@ -42,7 +43,6 @@ ExternalProject_Add(fontconfig
         --libdir=lib
         --buildtype=release
         --default-library=static
-        ${MESON_EXTRA_ARGS}
         -Ddoc=disabled
         -Dtests=disabled
         -Dtools=disabled
