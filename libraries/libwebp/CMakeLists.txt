@@ -1,17 +1,9 @@
 project(libwebp)
 
-include(ExternalProject)
 
-ExternalProject_Add(
-  libwebp
+add_external_target(libwebp
   GIT_REPOSITORY https://github.com/webmproject/libwebp.git
   GIT_TAG a4d7a715337ded4451fec90ff8ce79728e04126c # v1.5.0
-  PREFIX ${CMAKE_BINARY_DIR}/_deps/libwebp
-  LOG_CONFIGURE ON
-  LOG_INSTALL ON
-  LOG_BUILD ON
-  LOG_OUTPUT_ON_FAILURE ON
-  UPDATE_COMMAND ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND}
     -G${CMAKE_GENERATOR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -31,14 +23,10 @@ ExternalProject_Add(
     -DWEBP_BUILD_FUZZTEST=OFF
     <SOURCE_DIR>
   BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libwebp
 )
 
 set_target_properties(libwebp PROPERTIES
-  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libwebp/lib/libwebp.a
-  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libwebp/include
-  CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/_install/libwebp/share/WebP/cmake
-  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libwebp/lib/pkgconfig
-  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libwebp/include
-  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libwebp/lib
+  LIBRARY_DIRECTORY ${libwebp_INSTALL_DIR}/lib
+  INCLUDE_DIRECTORY ${libwebp_INSTALL_DIR}/include
+  PKG_CONFIG_PATH ${libwebp_INSTALL_DIR}/lib/pkgconfig
 )

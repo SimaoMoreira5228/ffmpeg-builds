@@ -1,17 +1,8 @@
 project(libbrotli)
 
-include(ExternalProject)
-
-ExternalProject_Add(
-  libbrotli
+add_external_target(libbrotli
   GIT_REPOSITORY https://github.com/google/brotli.git
   GIT_TAG ed738e842d2fbdf2d6459e39267a633c4a9b2f5d
-  PREFIX ${CMAKE_BINARY_DIR}/_deps/libbrotli
-  LOG_CONFIGURE ON
-  LOG_INSTALL ON
-  LOG_BUILD ON
-  LOG_OUTPUT_ON_FAILURE ON
-  UPDATE_COMMAND ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND}
     -G${CMAKE_GENERATOR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -21,15 +12,14 @@ ExternalProject_Add(
     -DBUILD_TESTING=OFF
     -DBUILD_EXAMPLES=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libbrotli
+  BUILD_COMMAND ${CMAKE_COMMAND}
+    --build .
+    --target install
+    --config ${CMAKE_BUILD_TYPE}
 )
 
 set_target_properties(libbrotli PROPERTIES
-  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libbrotli/lib/libbrotli.a
-  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libbrotli/include
-  CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/_install/libbrotli/lib/cmake/brotli
-  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libbrotli/lib/pkgconfig
-  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libbrotli/include
-  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libbrotli/lib
+  LIBRARY_DIRECTORY ${libbrotli_INSTALL_DIR}/lib
+  INCLUDE_DIRECTORY ${libbrotli_INSTALL_DIR}/include
+  PKG_CONFIG_PATH ${libbrotli_INSTALL_DIR}/lib/pkgconfig
 )

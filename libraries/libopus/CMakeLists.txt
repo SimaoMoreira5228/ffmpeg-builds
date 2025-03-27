@@ -1,17 +1,8 @@
 project(libopus)
 
-include(ExternalProject)
-
-ExternalProject_Add(
-  libopus
+add_external_target(libopus
   GIT_REPOSITORY https://github.com/xiph/opus.git
   GIT_TAG ddbe48383984d56acd9e1ab6a090c54ca6b735a6 # v1.5.2
-  PREFIX ${CMAKE_BINARY_DIR}/_deps/libopus
-  LOG_CONFIGURE ON
-  LOG_INSTALL ON
-  LOG_BUILD ON
-  LOG_OUTPUT_ON_FAILURE ON
-  UPDATE_COMMAND ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND}
     -G${CMAKE_GENERATOR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -20,15 +11,14 @@ ExternalProject_Add(
     -DOPUS_BUILD_SHARED_LIBRARY=OFF
     -DOPUS_BUILD_TESTING=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libopus
+  BUILD_COMMAND ${CMAKE_COMMAND}
+    --build .
+    --target install
+    --config ${CMAKE_BUILD_TYPE}
 )
 
 set_target_properties(libopus PROPERTIES
-  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libopus/lib/libopus.a
-  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libopus/include
-  CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/_install/libopus/lib/cmake/Opus
-  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libopus/lib/pkgconfig
-  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libopus/include
-  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libopus/lib
+  LIBRARY_DIRECTORY ${libopus_INSTALL_DIR}/lib
+  INCLUDE_DIRECTORY ${libopus_INSTALL_DIR}/include
+  PKG_CONFIG_PATH ${libopus_INSTALL_DIR}/lib/pkgconfig
 )

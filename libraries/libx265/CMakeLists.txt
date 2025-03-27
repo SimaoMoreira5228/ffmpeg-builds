@@ -2,16 +2,9 @@ project(libx265)
 
 include(ExternalProject)
 
-ExternalProject_Add(
-  libx265
+add_external_target(libx265
   GIT_REPOSITORY https://github.com/ScuffleCloud/x265-mirror.git
   GIT_TAG 1d117bed4747758b51bd2c124d738527e30392cb # v4.1
-  PREFIX ${CMAKE_BINARY_DIR}/_deps/libx265
-  LOG_CONFIGURE ON
-  LOG_INSTALL ON
-  LOG_BUILD ON
-  LOG_OUTPUT_ON_FAILURE ON
-  UPDATE_COMMAND ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND}
     -G${CMAKE_GENERATOR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -19,14 +12,14 @@ ExternalProject_Add(
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     -DENABLE_SHARED=OFF
     <SOURCE_DIR>/source
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libx265
+  BUILD_COMMAND ${CMAKE_COMMAND}
+    --build .
+    --target install
+    --config ${CMAKE_BUILD_TYPE}
 )
 
 set_target_properties(libx265 PROPERTIES
-  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libx265/lib/libx265.a
-  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libx265/include
-  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libx265/lib/pkgconfig
-  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libx265/include
-  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libx265/lib
+  LIBRARY_DIRECTORY ${libx265_INSTALL_DIR}/lib
+  INCLUDE_DIRECTORY ${libx265_INSTALL_DIR}/include
+  PKG_CONFIG_PATH ${libx265_INSTALL_DIR}/lib/pkgconfig
 )

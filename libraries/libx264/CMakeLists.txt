@@ -1,36 +1,13 @@
 project(libx264)
 
-include(ExternalProject)
-
-set(LIBX264_PREFIX ${CMAKE_BINARY_DIR}/_deps/libx264)
-set(LIBX264_INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libx264)
-set(LIBX264_SOURCE_DIR ${LIBX264_PREFIX}/src)
-set(LIBX264_TMP_DIR ${LIBX264_PREFIX}/tmp)
-set(LIBX264_STAMP_DIR ${LIBX264_PREFIX}/stamp)
-set(LIBX264_LOG_DIR ${LIBX264_PREFIX}/log)
-set(LIBX264_BINARY_DIR ${LIBX264_PREFIX}/build)
-
 find_program(BASH_BIN bash)
 
-ExternalProject_Add(libx264
+add_external_target(libx264
     GIT_REPOSITORY https://github.com/ScuffleCloud/x264-mirror.git
     GIT_TAG 0e48d072c28b6e5283d94109391f8efbb52593f2 # v1.15.1-rc1
-    PREFIX ${LIBX264_PREFIX}
-    TMP_DIR ${LIBX264_TMP_DIR}
-    STAMP_DIR ${LIBX264_STAMP_DIR}
-    INSTALL_DIR ${LIBX264_INSTALL_DIR}
-    SOURCE_DIR ${LIBX264_SOURCE_DIR}
-    LOG_DIR ${LIBX264_LOG_DIR}
-    UPDATE_DISCONNECTED TRUE
-    WORKING_DIRECTORY ${LIBX264_SOURCE_DIR}
     BUILD_IN_SOURCE TRUE
-    LOG_CONFIGURE ON
-    LOG_INSTALL ON
-    LOG_BUILD ON
-    LOG_OUTPUT_ON_FAILURE ON
-    UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${BASH_BIN} ./configure
-        --prefix=${LIBX264_INSTALL_DIR}
+        --prefix=<INSTALL_DIR>
         --enable-static
         --disable-opencl
         --disable-bashcompletion
@@ -40,9 +17,7 @@ ExternalProject_Add(libx264
 )
 
 set_target_properties(libx264 PROPERTIES
-    IMPORTED_LOCATION ${LIBX264_INSTALL_DIR}/lib/libx264.a
-    INTERFACE_INCLUDE_DIRECTORIES ${LIBX264_INSTALL_DIR}/include
-    PKG_CONFIG_PATH ${LIBX264_INSTALL_DIR}/lib/pkgconfig
-    INCLUDE_DIRECTORY ${LIBX264_INSTALL_DIR}/include
-    LIBRARY_DIRECTORY ${LIBX264_INSTALL_DIR}/lib
+    LIBRARY_DIRECTORY ${libx264_INSTALL_DIR}/lib
+    INCLUDE_DIRECTORY ${libx264_INSTALL_DIR}/include
+    PKG_CONFIG_PATH ${libx264_INSTALL_DIR}/lib/pkgconfig
 )

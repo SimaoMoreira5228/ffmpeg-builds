@@ -2,16 +2,9 @@ project(libaom)
 
 include(ExternalProject)
 
-ExternalProject_Add(
-  libaom
+add_external_target(libaom
   GIT_REPOSITORY https://github.com/ScuffleCloud/aom-mirror.git
   GIT_TAG 3b624af45b86646a20b11a9ff803aeae588cdee6 # v3.12.0
-  PREFIX ${CMAKE_BINARY_DIR}/_deps/libaom
-  LOG_CONFIGURE ON
-  LOG_INSTALL ON
-  LOG_BUILD ON
-  LOG_OUTPUT_ON_FAILURE ON
-  UPDATE_COMMAND ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND}
     -G${CMAKE_GENERATOR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -23,14 +16,14 @@ ExternalProject_Add(
     -DENABLE_EXAMPLES=OFF
     -DENABLE_TOOLS=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libaom
+  BUILD_COMMAND ${CMAKE_COMMAND}
+    --build .
+    --target install
+    --config ${CMAKE_BUILD_TYPE}
 )
 
 set_target_properties(libaom PROPERTIES
-  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libaom/lib/libaom.a
-  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libaom/include
-  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libaom/lib/pkgconfig
-  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libaom/include
-  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libaom/lib
+  LIBRARY_DIRECTORY ${libaom_INSTALL_DIR}/lib
+  INCLUDE_DIRECTORY ${libaom_INSTALL_DIR}/include
+  PKG_CONFIG_PATH ${libaom_INSTALL_DIR}/lib/pkgconfig
 )
