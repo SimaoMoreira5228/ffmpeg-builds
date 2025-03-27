@@ -48,33 +48,30 @@ function(add_external_target TARGET)
         endif()
     endfunction()
 
-    set(REMAINING_DEPS ${EXTERNAL_DEPENDS})
     set(DEPENDANCY_TREE)
-
-    while(REMAINING_DEPS)
-        list(GET REMAINING_DEPS 0 DEP)
-        list(REMOVE_AT REMAINING_DEPS 0)
-
-        if(NOT DEP IN_LIST DEPENDANCY_TREE)
+    foreach(DEP ${EXTERNAL_DEPENDS})
+        if(TARGET ${DEP})
             list(APPEND DEPENDANCY_TREE ${DEP})
-
-            if(TARGET ${DEP})
-                extend_env_var(${DEP} PKG_CONFIG_PATH EXTERNAL_ENV_ARGS)
-                extend_env_var(${DEP} CMAKE_PREFIX_PATH EXTERNAL_ENV_ARGS)
-                extend_env_var(${DEP} CMAKE_MODULE_PATH EXTERNAL_ENV_ARGS)
-                extend_env_var(${DEP} CFLAGS EXTERNAL_ENV_ARGS)
-                extend_env_var(${DEP} CXXFLAGS EXTERNAL_ENV_ARGS)
-                extend_env_var(${DEP} CPPFLAGS EXTERNAL_ENV_ARGS)
-                extend_env_var(${DEP} LDFLAGS EXTERNAL_ENV_ARGS)
-
-                # Append sub-dependencies to the DEPENDANCY_TREE for further processing
-                get_target_property(SUB_DEPENDANCY_TREE ${DEP} DEPENDANCY_TREE)
-                if(SUB_DEPENDANCY_TREE)
-                    list(APPEND REMAINING_DEPS ${SUB_DEPENDANCY_TREE})
+            get_target_property(SUB_DEPENDANCY_TREE ${DEP} DEPENDANCY_TREE)
+            foreach(SUB_DEP ${SUB_DEPENDANCY_TREE})
+                if(NOT SUB_DEP IN_LIST DEPENDANCY_TREE)
+                    list(APPEND DEPENDANCY_TREE ${SUB_DEP})
                 endif()
-            endif()
+            endforeach()
         endif()
-    endwhile()
+    endforeach()
+
+    foreach(DEP ${DEPENDANCY_TREE})
+        extend_env_var(${DEP} PKG_CONFIG_PATH EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} CMAKE_PREFIX_PATH EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} CMAKE_MODULE_PATH EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} CFLAGS EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} CXXFLAGS EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} CPPFLAGS EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} LDFLAGS EXTERNAL_ENV_ARGS)
+    endforeach()
+
+    message(STATUS "DEPENDANCY_TREE: ${DEPENDANCY_TREE}")
 
     if(NOT EXTERNAL_CONFIGURE_COMMAND)
         set(EXTERNAL_CONFIGURE_COMMAND ${CMAKE_COMMAND} -E true)
@@ -156,5 +153,6 @@ function(add_external_target TARGET)
 
     set_target_properties(${TARGET} PROPERTIES
         DEPENDANCY_TREE "${DEPENDANCY_TREE}"
+        DIRECT_DEPENDANCIES "${EXTERNAL_DEPENDS}"
     )
 endfunction()

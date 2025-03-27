@@ -25,6 +25,6 @@ set_target_properties(libopus PROPERTIES
   LIBRARY_DIRECTORY ${libopus_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libopus_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libopus_INSTALL_DIR}/lib/pkgconfig
-  CMAKE_PREFIX_PATH ${libopus_INSTALL_DIR}/lib/cmake/Opus
+  CMAKE_PREFIX_PATH ${libopus_INSTALL_DIR}
   LIBRARY_FILE ${libopus_INSTALL_DIR}/lib/libopus${STATIC_LIBRARY_EXTENSION}
 )

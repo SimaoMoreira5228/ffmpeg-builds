@@ -27,6 +27,6 @@ set_target_properties(harfbuzz PROPERTIES
   LIBRARY_DIRECTORY ${harfbuzz_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${harfbuzz_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${harfbuzz_INSTALL_DIR}/lib/pkgconfig
-  CMAKE_PREFIX_PATH ${harfbuzz_INSTALL_DIR}/lib/cmake/harfbuzz
+  CMAKE_PREFIX_PATH ${harfbuzz_INSTALL_DIR}`
   LIBRARY_FILE ${harfbuzz_INSTALL_DIR}/lib/libharfbuzz${STATIC_LIBRARY_EXTENSION}
 )
