@@ -1,0 +1,68 @@
+project(openssl)
+
+include(ExternalProject)
+
+set(OPENSSL_PREFIX ${CMAKE_BINARY_DIR}/_deps/openssl)
+set(OPENSSL_INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/openssl)
+set(OPENSSL_SOURCE_DIR ${OPENSSL_PREFIX}/src)
+set(OPENSSL_TMP_DIR ${OPENSSL_PREFIX}/tmp)
+set(OPENSSL_STAMP_DIR ${OPENSSL_PREFIX}/stamp)
+set(OPENSSL_LOG_DIR ${OPENSSL_PREFIX}/log)
+set(OPENSSL_BINARY_DIR ${OPENSSL_PREFIX}/build)
+
+if(WIN32)
+    set(OPENSSL_CONFIG VC-WIN64A)
+elseif(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(OPENSSL_CONFIG darwin64-arm64-cc)
+elseif(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(OPENSSL_CONFIG darwin64-x86_64-cc)
+elseif(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+    set(OPENSSL_CONFIG linux-aarch64)
+elseif(UNIX AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(OPENSSL_CONFIG linux-x86_64)
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+
+ExternalProject_Add(openssl
+    GIT_REPOSITORY https://github.com/openssl/openssl.git
+    GIT_TAG 0c6656a7a31492ddd61e3d0d8b0e66645f4b2d6f # v3.5.0-beta1
+    PREFIX ${OPENSSL_PREFIX}
+    TMP_DIR ${OPENSSL_TMP_DIR}
+    STAMP_DIR ${OPENSSL_STAMP_DIR}
+    INSTALL_DIR ${OPENSSL_INSTALL_DIR}
+    SOURCE_DIR ${OPENSSL_SOURCE_DIR}
+    LOG_DIR ${OPENSSL_LOG_DIR}
+    UPDATE_DISCONNECTED TRUE
+    WORKING_DIRECTORY ${OPENSSL_SOURCE_DIR}
+    BUILD_IN_SOURCE TRUE
+    LOG_CONFIGURE ON
+    LOG_INSTALL ON
+    LOG_BUILD ON
+    LOG_OUTPUT_ON_FAILURE ON
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ${PERL} ./Configure ${OPENSSL_CONFIG}
+            --prefix=${OPENSSL_INSTALL_DIR}
+            --openssldir=${OPENSSL_INSTALL_DIR}/ssl
+            no-shared
+            no-docs
+            no-tests
+            zlib
+            -fPIC
+            -static
+            --with-zlib-include=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
+            --with-zlib-lib=$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>
+    BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL}
+    INSTALL_COMMAND make install
+    DEPENDS zlib
+)
+
+set_target_properties(openssl PROPERTIES
+    IMPORTED_LOCATION "${OPENSSL_INSTALL_DIR}/lib64/libssl.a ${OPENSSL_INSTALL_DIR}/lib64/libcrypto.a"
+    INTERFACE_INCLUDE_DIRECTORIES ${OPENSSL_INSTALL_DIR}/include
+    PKG_CONFIG_PATH ${OPENSSL_INSTALL_DIR}/lib64/pkgconfig
+    INCLUDE_DIRECTORY ${OPENSSL_INSTALL_DIR}/include
+    LIBRARY_DIRECTORY ${OPENSSL_INSTALL_DIR}/lib64
+    CMAKE_MODULE_PATH ${OPENSSL_INSTALL_DIR}/lib64/cmake/OpenSSL
+)

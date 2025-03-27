@@ -1,0 +1,37 @@
+project(libexpat)
+
+include(ExternalProject)
+
+ExternalProject_Add(
+  libexpat
+  GIT_REPOSITORY https://github.com/libexpat/libexpat.git
+  GIT_TAG 6d4ffe856df497ac2cae33537665c3fec7ec8a00
+  PREFIX ${CMAKE_BINARY_DIR}/_deps/libexpat
+  LOG_CONFIGURE ON
+  LOG_INSTALL ON
+  LOG_BUILD ON
+  LOG_OUTPUT_ON_FAILURE ON
+  UPDATE_COMMAND ""
+  CONFIGURE_COMMAND ${CMAKE_COMMAND}
+    -G${CMAKE_GENERATOR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    -DEXPAT_BUILD_TOOLS=${EXPAT_BUILD_TOOLS}
+    -DEXPAT_BUILD_DOCS=${EXPAT_BUILD_DOCS}
+    -DEXPAT_BUILD_EXAMPLES=${EXPAT_BUILD_EXAMPLES}
+    -DEXPAT_BUILD_TESTS=${EXPAT_BUILD_TESTS}
+    -DEXPAT_SHARED_LIBS=${EXPAT_SHARED_LIBS}
+    <SOURCE_DIR>/expat
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
+  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libexpat
+)
+
+set_target_properties(libexpat PROPERTIES
+  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libexpat/lib/libexpat.a
+  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libexpat/include
+  CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/_install/libexpat/lib/cmake/expat
+  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libexpat/lib/pkgconfig
+  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libexpat/include
+  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libexpat/lib
+)

@@ -1,0 +1,39 @@
+project(libpng)
+
+include(ExternalProject)
+
+ExternalProject_Add(
+  libpng
+  GIT_REPOSITORY https://github.com/glennrp/libpng.git
+  GIT_TAG 872555f4ba910252783af1507f9e7fe1653be252 # v1.6.47
+  PREFIX ${CMAKE_BINARY_DIR}/_deps/libpng
+  LOG_CONFIGURE ON
+  LOG_INSTALL ON
+  LOG_BUILD ON
+  LOG_OUTPUT_ON_FAILURE ON
+  UPDATE_COMMAND ""
+  CONFIGURE_COMMAND ${CMAKE_COMMAND}
+    -G${CMAKE_GENERATOR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DBUILD_SHARED_LIBS=OFF
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    -DPNG_SHARED=OFF
+    -DPNG_STATIC=ON
+    -DPNG_TESTS=OFF
+    -DZLIB_INCLUDE_DIR=$<TARGET_PROPERTY:zlib,INTERFACE_INCLUDE_DIRECTORIES>
+    -DZLIB_LIBRARY=$<TARGET_PROPERTY:zlib,IMPORTED_LOCATION>
+    <SOURCE_DIR>
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
+  INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libpng
+  DEPENDS zlib
+)
+
+set_target_properties(libpng PROPERTIES
+  IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/_install/libpng/lib/libpng.a
+  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/_install/libpng/include
+  CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/_install/libpng/lib/cmake/PNG;${CMAKE_BINARY_DIR}/_install/libpng/lib/libpng"
+  PKG_CONFIG_PATH ${CMAKE_BINARY_DIR}/_install/libpng/lib/pkgconfig
+  INCLUDE_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libpng/include
+  LIBRARY_DIRECTORY ${CMAKE_BINARY_DIR}/_install/libpng/lib
+)

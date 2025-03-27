@@ -1,0 +1,49 @@
+project(libdav1d)
+
+include(ExternalProject)
+
+set(LIBDAV1D_PREFIX ${CMAKE_BINARY_DIR}/_deps/libdav1d)
+set(LIBDAV1D_INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/libdav1d)
+set(LIBDAV1D_SOURCE_DIR ${LIBDAV1D_PREFIX}/src)
+set(LIBDAV1D_TMP_DIR ${LIBDAV1D_PREFIX}/tmp)
+set(LIBDAV1D_STAMP_DIR ${LIBDAV1D_PREFIX}/stamp)
+set(LIBDAV1D_LOG_DIR ${LIBDAV1D_PREFIX}/log)
+set(LIBDAV1D_BINARY_DIR ${LIBDAV1D_PREFIX}/build)
+
+ExternalProject_Add(libdav1d
+    GIT_REPOSITORY https://github.com/videolan/dav1d.git
+    GIT_TAG 42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa
+    PREFIX ${LIBDAV1D_PREFIX}
+    TMP_DIR ${LIBDAV1D_TMP_DIR}
+    STAMP_DIR ${LIBDAV1D_STAMP_DIR}
+    INSTALL_DIR ${LIBDAV1D_INSTALL_DIR}
+    SOURCE_DIR ${LIBDAV1D_SOURCE_DIR}
+    LOG_DIR ${LIBDAV1D_LOG_DIR}
+    UPDATE_DISCONNECTED TRUE
+    WORKING_DIRECTORY ${LIBDAV1D_SOURCE_DIR}
+    BUILD_IN_SOURCE TRUE
+    LOG_CONFIGURE ON
+    LOG_INSTALL ON
+    LOG_BUILD ON
+    LOG_OUTPUT_ON_FAILURE ON
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ${MESON} setup ${LIBDAV1D_BINARY_DIR}
+        --prefix=${LIBDAV1D_INSTALL_DIR}
+        --optimization=3
+        --prefer-static
+        --libdir=lib
+        --buildtype=release
+        --default-library=static
+        -Denable_tools=false
+        -Denable_tests=false
+    BUILD_COMMAND ${MESON} compile -C ${LIBDAV1D_BINARY_DIR}
+    INSTALL_COMMAND ${MESON} install -C ${LIBDAV1D_BINARY_DIR}
+)
+
+set_target_properties(libdav1d PROPERTIES
+    IMPORTED_LOCATION ${LIBDAV1D_INSTALL_DIR}/lib/libdav1d.a
+    INTERFACE_INCLUDE_DIRECTORIES ${LIBDAV1D_INSTALL_DIR}/include
+    PKG_CONFIG_PATH ${LIBDAV1D_INSTALL_DIR}/lib/pkgconfig
+    INCLUDE_DIRECTORY ${LIBDAV1D_INSTALL_DIR}/include
+    LIBRARY_DIRECTORY ${LIBDAV1D_INSTALL_DIR}/lib
+)
