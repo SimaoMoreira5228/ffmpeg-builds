@@ -24,4 +24,5 @@ set_target_properties(libdav1d PROPERTIES
     LIBRARY_DIRECTORY ${libdav1d_INSTALL_DIR}/lib
     INCLUDE_DIRECTORY ${libdav1d_INSTALL_DIR}/include
     PKG_CONFIG_PATH ${libdav1d_INSTALL_DIR}/lib/pkgconfig
+    LIBRARY_FILE ${libdav1d_INSTALL_DIR}/lib/libdav1d${STATIC_LIBRARY_EXTENSION}
 )

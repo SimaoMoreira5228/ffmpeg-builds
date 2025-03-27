@@ -25,4 +25,5 @@ set_target_properties(libfdk-aac PROPERTIES
   INCLUDE_DIRECTORY ${libfdk-aac_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libfdk-aac_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libfdk-aac_INSTALL_DIR}/lib/cmake/fdk-aac
+  LIBRARY_FILE ${libfdk-aac_INSTALL_DIR}/lib/libfdk-aac${STATIC_LIBRARY_EXTENSION}
 )

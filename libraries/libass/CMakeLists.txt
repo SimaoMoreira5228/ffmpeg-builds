@@ -25,4 +25,5 @@ set_target_properties(libass PROPERTIES
     LIBRARY_DIRECTORY ${libass_INSTALL_DIR}/lib
     INCLUDE_DIRECTORY ${libass_INSTALL_DIR}/include
     PKG_CONFIG_PATH ${libass_INSTALL_DIR}/lib/pkgconfig
+    LIBRARY_FILE ${libass_INSTALL_DIR}/lib/libass${STATIC_LIBRARY_EXTENSION}
 )

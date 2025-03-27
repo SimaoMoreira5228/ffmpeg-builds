@@ -31,4 +31,5 @@ set_target_properties(libexpat PROPERTIES
   INCLUDE_DIRECTORY ${libexpat_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libexpat_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libexpat_INSTALL_DIR}/lib/cmake/expat-2.7.0
+  LIBRARY_FILE ${libexpat_INSTALL_DIR}/lib/libexpat${STATIC_LIBRARY_EXTENSION}
 )

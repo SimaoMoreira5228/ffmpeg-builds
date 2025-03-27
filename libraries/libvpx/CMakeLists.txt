@@ -27,4 +27,5 @@ set_target_properties(libvpx PROPERTIES
     LIBRARY_DIRECTORY ${libvpx_INSTALL_DIR}/lib
     INCLUDE_DIRECTORY ${libvpx_INSTALL_DIR}/include
     PKG_CONFIG_PATH ${libvpx_INSTALL_DIR}/lib/pkgconfig
+    LIBRARY_FILE ${libvpx_INSTALL_DIR}/lib/libvpx${STATIC_LIBRARY_EXTENSION}
 )

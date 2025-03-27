@@ -20,4 +20,5 @@ set_target_properties(libx264 PROPERTIES
     LIBRARY_DIRECTORY ${libx264_INSTALL_DIR}/lib
     INCLUDE_DIRECTORY ${libx264_INSTALL_DIR}/include
     PKG_CONFIG_PATH ${libx264_INSTALL_DIR}/lib/pkgconfig
+    LIBRARY_FILE ${libx264_INSTALL_DIR}/lib/libx264${STATIC_LIBRARY_EXTENSION}
 )

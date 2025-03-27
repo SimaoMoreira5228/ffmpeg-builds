@@ -25,4 +25,5 @@ set_target_properties(fribidi PROPERTIES
     LIBRARY_DIRECTORY ${fribidi_INSTALL_DIR}/lib
     INCLUDE_DIRECTORY ${fribidi_INSTALL_DIR}/include
     PKG_CONFIG_PATH ${fribidi_INSTALL_DIR}/lib/pkgconfig
+    LIBRARY_FILE ${fribidi_INSTALL_DIR}/lib/libfribidi${STATIC_LIBRARY_EXTENSION}
 )

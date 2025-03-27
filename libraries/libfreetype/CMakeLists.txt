@@ -23,6 +23,8 @@ add_external_target(
     -DFT_DISABLE_HARFBUZZ=ON
     -DZLIB_INCLUDE_DIR=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
     -DZLIB_LIBRARY=$<TARGET_PROPERTY:zlib,LIBRARY_FILE>
+    -DPNG_INCLUDE_DIR=$<TARGET_PROPERTY:libpng,INCLUDE_DIRECTORY>
+    -DPNG_LIBRARY=$<TARGET_PROPERTY:libpng,LIBRARY_FILE>
     <SOURCE_DIR>
   BUILD_COMMAND ${CMAKE_COMMAND}
     --build .
@@ -36,4 +38,5 @@ set_target_properties(libfreetype PROPERTIES
   INCLUDE_DIRECTORY ${libfreetype_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libfreetype_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libfreetype_INSTALL_DIR}/lib/cmake/freetype
+  LIBRARY_FILE ${libfreetype_INSTALL_DIR}/lib/libfreetype${STATIC_LIBRARY_EXTENSION}
 )

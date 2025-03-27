@@ -30,4 +30,5 @@ set_target_properties(libaom PROPERTIES
   LIBRARY_DIRECTORY ${libaom_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libaom_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libaom_INSTALL_DIR}/lib/pkgconfig
+  LIBRARY_FILE ${libaom_INSTALL_DIR}/lib/libaom${STATIC_LIBRARY_EXTENSION}
 )

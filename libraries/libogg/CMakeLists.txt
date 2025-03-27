@@ -28,4 +28,5 @@ set_target_properties(libogg PROPERTIES
   INCLUDE_DIRECTORY ${libogg_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libogg_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libogg_INSTALL_DIR}/lib/cmake/Ogg
+  LIBRARY_FILE ${libogg_INSTALL_DIR}/lib/libogg${STATIC_LIBRARY_EXTENSION}
 )

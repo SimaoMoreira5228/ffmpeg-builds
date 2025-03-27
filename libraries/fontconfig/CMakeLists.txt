@@ -35,4 +35,5 @@ set_target_properties(fontconfig PROPERTIES
     LIBRARY_DIRECTORY ${fontconfig_INSTALL_DIR}/lib
     INCLUDE_DIRECTORY ${fontconfig_INSTALL_DIR}/include
     PKG_CONFIG_PATH ${fontconfig_INSTALL_DIR}/lib/pkgconfig
+    LIBRARY_FILE ${fontconfig_INSTALL_DIR}/lib/libfontconfig${STATIC_LIBRARY_EXTENSION}
 )

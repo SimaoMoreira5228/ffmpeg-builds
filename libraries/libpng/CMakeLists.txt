@@ -31,4 +31,6 @@ set_target_properties(libpng PROPERTIES
   INCLUDE_DIRECTORY ${libpng_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libpng_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libpng_INSTALL_DIR}/lib/cmake/PNG
+  LIBRARY_FILE ${libpng_INSTALL_DIR}/lib/libpng16${STATIC_LIBRARY_EXTENSION}
+
 )
