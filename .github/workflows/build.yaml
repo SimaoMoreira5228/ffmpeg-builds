@@ -47,6 +47,12 @@ jobs:
         if: matrix.os == 'macos-15' || matrix.os == 'macos-13'
         run: brew install git nasm yasm cmake make meson ninja pkg-config
 
+      - name: Save Path
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          echo "BACK_PATH=$PATH" >> $GITHUB_ENV
+
       - uses: MinoruSekine/setup-scoop@v4.0.1
         if: runner.os == 'Windows'
         with:
@@ -56,12 +62,10 @@ jobs:
         if: matrix.os == 'windows-2022'
         shell: cmd
         run: |
-          @echo off
           set "ORIGINAL_PATH=%PATH%"
-          set "PATH=%SystemRoot%\System32;%SystemRoot%;%SystemRoot%\System32\Wbem"
+          set "PATH=%BACK_PATH%"
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          set "VC_PATHS=%PATH%"
-          set "PATH=%VC_PATHS%;%ORIGINAL_PATH%"
+          set "PATH=%PATH%;%ORIGINAL_PATH%"
           bash build.sh
 
       - name: Build FFmpeg Linux/macOS

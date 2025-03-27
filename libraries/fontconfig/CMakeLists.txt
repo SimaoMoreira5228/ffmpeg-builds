@@ -13,7 +13,7 @@ set(FONTCONFIG_BINARY_DIR ${FONTCONFIG_PREFIX}/build)
 find_program(MESON_BIN meson)
 
 if(APPLE)
-    set(MESON_EXTRA_ARGS "--c_link_args=-framework CoreFoundation -liconv")
+    set(MESON_EXTRA_ARGS "--linker-args=-framework CoreFoundation" "--linker-arg=-liconv")
 endif()
 
 ExternalProject_Add(fontconfig
