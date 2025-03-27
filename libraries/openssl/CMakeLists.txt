@@ -40,5 +40,5 @@ set_target_properties(openssl PROPERTIES
     PKG_CONFIG_PATH ${openssl_INSTALL_DIR}/lib64/pkgconfig
     INCLUDE_DIRECTORY ${openssl_INSTALL_DIR}/include
     LIBRARY_DIRECTORY ${openssl_INSTALL_DIR}/lib64
-    CMAKE_MODULE_PATH ${openssl_INSTALL_DIR}/lib64/cmake/OpenSSL
+    CMAKE_PREFIX_PATH ${openssl_INSTALL_DIR}/lib64/cmake/OpenSSL
 )

@@ -31,5 +31,5 @@ set_target_properties(libfreetype PROPERTIES
   LIBRARY_DIRECTORY ${libfreetype_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libfreetype_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libfreetype_INSTALL_DIR}/lib/pkgconfig
-  CMAKE_MODULE_PATH ${libfreetype_INSTALL_DIR}/lib/cmake/freetype
+  CMAKE_PREFIX_PATH ${libfreetype_INSTALL_DIR}/lib/cmake/freetype
 )
