@@ -56,7 +56,12 @@ jobs:
         if: matrix.os == 'windows-2022'
         shell: cmd
         run: |
+          @echo off
+          set "ORIGINAL_PATH=%PATH%"
+          set "PATH=%SystemRoot%\System32;%SystemRoot%;%SystemRoot%\System32\Wbem"
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          set "VC_PATHS=%PATH%"
+          set "PATH=%VC_PATHS%;%ORIGINAL_PATH%"
           bash build.sh
 
       - name: Build FFmpeg Linux/macOS

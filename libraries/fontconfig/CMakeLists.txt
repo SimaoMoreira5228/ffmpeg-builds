@@ -12,6 +12,10 @@ set(FONTCONFIG_BINARY_DIR ${FONTCONFIG_PREFIX}/build)
 
 find_program(MESON_BIN meson)
 
+if(APPLE)
+    set(MESON_EXTRA_ARGS "--c_link_args=-framework CoreFoundation -liconv")
+endif()
+
 ExternalProject_Add(fontconfig
     GIT_REPOSITORY https://github.com/ScuffleCloud/fontconfig-mirror.git
     GIT_TAG f511346fe16f205f087a97faf32d3c7d07d5b3c8 # v2.16.1
@@ -38,6 +42,7 @@ ExternalProject_Add(fontconfig
         --libdir=lib
         --buildtype=release
         --default-library=static
+        ${MESON_EXTRA_ARGS}
         -Ddoc=disabled
         -Dtests=disabled
         -Dtools=disabled

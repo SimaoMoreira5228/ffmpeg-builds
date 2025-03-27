@@ -45,6 +45,10 @@ list(JOIN FFMPEG_DEPENDENCIES_PKG_CONFIG_PATH ":" PKG_CONFIG_PATH)
 
 find_program(BASH_BIN bash)
 
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    set(FFMPEG_EXTRA_CONFIG_ARGS "--enable-x86asm")
+endif()
+
 ExternalProject_Add(ffmpeg
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
     GIT_TAG ${FFMPEG_TAG}
@@ -73,12 +77,12 @@ ExternalProject_Add(ffmpeg
         "--pkg-config-flags=--static --define-prefix"
         --enable-gpl
         --enable-asm
-        --enable-x86asm
         --enable-nonfree
         --enable-version3
         --enable-openssl
-        ${FFMPEG_DEPENDENCY_ARGS}
         --disable-autodetect
+        ${FFMPEG_DEPENDENCY_ARGS}
+        ${FFMPEG_EXTRA_CONFIG_ARGS}
     BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
     DEPENDS ${FFMPEG_DEPENDENCIES}
