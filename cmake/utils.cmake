@@ -48,17 +48,33 @@ function(add_external_target TARGET)
         endif()
     endfunction()
 
-    foreach(DEPEND ${EXTERNAL_DEPENDS})
-        if(TARGET ${DEPEND})
-            extend_env_var(${DEPEND} PKG_CONFIG_PATH EXTERNAL_ENV_ARGS)
-            extend_env_var(${DEPEND} CMAKE_PREFIX_PATH EXTERNAL_ENV_ARGS)
-            extend_env_var(${DEPEND} CMAKE_MODULE_PATH EXTERNAL_ENV_ARGS)
-            extend_env_var(${DEPEND} CFLAGS EXTERNAL_ENV_ARGS)
-            extend_env_var(${DEPEND} CXXFLAGS EXTERNAL_ENV_ARGS)
-            extend_env_var(${DEPEND} CPPFLAGS EXTERNAL_ENV_ARGS)
-            extend_env_var(${DEPEND} LDFLAGS EXTERNAL_ENV_ARGS)
+    set(REMAINING_DEPS ${EXTERNAL_DEPENDS})
+    set(DEPENDANCY_TREE)
+
+    while(REMAINING_DEPS)
+        list(GET REMAINING_DEPS 0 DEP)
+        list(REMOVE_AT REMAINING_DEPS 0)
+
+        if(NOT DEP IN_LIST DEPENDANCY_TREE)
+            list(APPEND DEPENDANCY_TREE ${DEP})
+
+            if(TARGET ${DEP})
+                extend_env_var(${DEP} PKG_CONFIG_PATH EXTERNAL_ENV_ARGS)
+                extend_env_var(${DEP} CMAKE_PREFIX_PATH EXTERNAL_ENV_ARGS)
+                extend_env_var(${DEP} CMAKE_MODULE_PATH EXTERNAL_ENV_ARGS)
+                extend_env_var(${DEP} CFLAGS EXTERNAL_ENV_ARGS)
+                extend_env_var(${DEP} CXXFLAGS EXTERNAL_ENV_ARGS)
+                extend_env_var(${DEP} CPPFLAGS EXTERNAL_ENV_ARGS)
+                extend_env_var(${DEP} LDFLAGS EXTERNAL_ENV_ARGS)
+
+                # Append sub-dependencies to the DEPENDANCY_TREE for further processing
+                get_target_property(SUB_DEPENDANCY_TREE ${DEP} DEPENDANCY_TREE)
+                if(SUB_DEPENDANCY_TREE)
+                    list(APPEND REMAINING_DEPS ${SUB_DEPENDANCY_TREE})
+                endif()
+            endif()
         endif()
-    endforeach()
+    endwhile()
 
     if(NOT EXTERNAL_CONFIGURE_COMMAND)
         set(EXTERNAL_CONFIGURE_COMMAND ${CMAKE_COMMAND} -E true)
@@ -136,5 +152,9 @@ function(add_external_target TARGET)
             --
             ${EXTERNAL_INSTALL_COMMAND}
         DEPENDS ${EXTERNAL_DEPENDS}
+    )
+
+    set_target_properties(${TARGET} PROPERTIES
+        DEPENDANCY_TREE "${DEPENDANCY_TREE}"
     )
 endfunction()
