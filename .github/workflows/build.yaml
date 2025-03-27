@@ -45,13 +45,7 @@ jobs:
 
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-15' || matrix.os == 'macos-13'
-        run: brew install git nasm yasm cmake make meson ninja pkg-config
-
-      - name: Save Path
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          echo BACKUP_PATH=%PATH%>> %GITHUB_ENV%
+        run: brew install git nasm yasm cmake make meson ninja pkg-config`
 
       - uses: ilammy/msvc-dev-cmd@v1
         name: Setup MSVC
@@ -61,6 +55,12 @@ jobs:
         if: runner.os == 'Windows'
         with:
           apps: perl nasm meson ninja pkg-config cmake make
+
+      - name: Move gnu link out of the way
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mv /usr/bin/link.exe /usr/bin/gnu-link.exe
 
       - name: Build FFmpeg
         run: bash build.sh
