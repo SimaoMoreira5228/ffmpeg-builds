@@ -71,8 +71,6 @@ function(add_external_target TARGET)
         extend_env_var(${DEP} LDFLAGS EXTERNAL_ENV_ARGS)
     endforeach()
 
-    message(STATUS "DEPENDANCY_TREE: ${DEPENDANCY_TREE}")
-
     if(NOT EXTERNAL_CONFIGURE_COMMAND)
         set(EXTERNAL_CONFIGURE_COMMAND ${CMAKE_COMMAND} -E true)
     endif()
