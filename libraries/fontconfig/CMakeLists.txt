@@ -31,6 +31,7 @@ ExternalProject_Add(fontconfig
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         PKG_CONFIG_PATH=$<TARGET_PROPERTY:libexpat,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libpng,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:zlib,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libfreetype,PKG_CONFIG_PATH>
+        PATH=$ENV{PATH}:$<TARGET_PROPERTY:gperf,PATH>
         --
         ${MESON_BIN} setup ${FONTCONFIG_BINARY_DIR}
         --prefix=${FONTCONFIG_INSTALL_DIR}
@@ -38,18 +39,19 @@ ExternalProject_Add(fontconfig
         --libdir=lib
         --buildtype=release
         --default-library=static
+        --wrap-mode=nodownload
         -Ddoc=disabled
         -Dtests=disabled
         -Dtools=disabled
     BUILD_COMMAND ${MESON_BIN} compile -C ${FONTCONFIG_BINARY_DIR}
     INSTALL_COMMAND ${MESON_BIN} install -C ${FONTCONFIG_BINARY_DIR}
-    DEPENDS libexpat libpng zlib libfreetype
+    DEPENDS libexpat libpng zlib libfreetype gperf
 )
 
 ExternalProject_Add_Step(
     fontconfig
     remove_shared_libs
-    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${FONTCONFIG_INSTALL_DIR}/lib/libfontconfig.so* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/remove_files_glob.cmake
+    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${FONTCONFIG_INSTALL_DIR}/lib/libfontconfig${SHARED_LIBRARY_EXTENSION}* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/remove_files_glob.cmake
     DEPENDEES install
     COMMENT "Removing shared libraries"
 )

@@ -35,6 +35,7 @@ ExternalProject_Add(fribidi
         --libdir=lib
         --buildtype=release
         --default-library=static
+        --wrap-mode=nodownload
         -Ddocs=false
         -Dtests=false
         -Dbin=false

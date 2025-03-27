@@ -45,6 +45,7 @@ ExternalProject_Add(libass
         --libdir=lib
         --buildtype=release
         --default-library=static
+        --wrap-mode=nodownload
         -Dtest=false
         -Dlibunibreak=disabled
     BUILD_COMMAND ${MESON_BIN} compile -C ${LIBASS_BINARY_DIR}

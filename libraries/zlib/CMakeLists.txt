@@ -24,11 +24,10 @@ ExternalProject_Add(
   BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
   INSTALL_DIR ${CMAKE_BINARY_DIR}/_install/zlib
 )
-
 ExternalProject_Add_Step(
     zlib
     remove_shared_libs
-    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${CMAKE_BINARY_DIR}/_install/zlib/lib/libz.so* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/remove_files_glob.cmake
+    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${CMAKE_BINARY_DIR}/_install/zlib/lib/libz${SHARED_LIBRARY_EXTENSION}* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/remove_files_glob.cmake
     DEPENDEES install
     COMMENT "Removing shared libraries"
 )

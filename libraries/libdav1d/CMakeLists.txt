@@ -35,6 +35,7 @@ ExternalProject_Add(libdav1d
         --libdir=lib
         --buildtype=release
         --default-library=static
+        --wrap-mode=nodownload
         -Denable_tools=false
         -Denable_tests=false
     BUILD_COMMAND ${MESON_BIN} compile -C ${LIBDAV1D_BINARY_DIR}
