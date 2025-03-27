@@ -8,11 +8,9 @@ ARCH=$(uname -m)
 
 case $OS in
     Darwin | Linux)
-        cmake_generator="Ninja"
         perl=$(which perl)
         ;;
     CYGWIN* | MINGW* | MSYS*)
-        cmake_generator="Visual Studio 17 2022"
         perl="/c/Strawberry/perl/bin/perl"
         ;;
     *)
@@ -22,10 +20,10 @@ case $OS in
 esac
 
 if [ "$OS" = "Darwin" ]; then
-    CMAKE_BUILD_PARALLEL_LEVEL=$(sysctl -n hw.ncpu)
+    export CMAKE_BUILD_PARALLEL_LEVEL=$(sysctl -n hw.ncpu)
     export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1,2)
 else
-    CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
+    export CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
 fi
 
 function build_ffmpeg() {
@@ -34,7 +32,7 @@ function build_ffmpeg() {
     local tar_name="ffmpeg-$tag-$OS-$ARCH"
     echo "::group::Building ffmpeg $tag"
 
-    cmake -G"${cmake_generator}" -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag -DCMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} -DPERL_BIN=${perl}
+    cmake -GNinja -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag -DCMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} -DPERL_BIN=${perl}
     cmake --build build --config Release --parallel ${CMAKE_BUILD_PARALLEL_LEVEL} --target install
 
     mkdir -p tmp/$tar_name
