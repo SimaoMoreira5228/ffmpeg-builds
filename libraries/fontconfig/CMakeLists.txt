@@ -12,17 +12,6 @@ set(FONTCONFIG_BINARY_DIR ${FONTCONFIG_PREFIX}/build)
 
 find_program(MESON_BIN meson)
 
-if(WIN32)
-    file(TO_CMAKE_PATH "$ENV{PATH}" PATH_ENV)
-    file(TO_CMAKE_PATH "$<TARGET_PROPERTY:gperf,PATH>" GPERF_PATH)
-
-    set(PATH_LIST ${GPERF_PATH})
-    list(APPEND PATH_LIST ${PATH_ENV})
-    list(JOIN PATH_LIST ";" PATH_WITH_ADDITION)
-else()
-    set(PATH_WITH_ADDITION "$<TARGET_PROPERTY:gperf,PATH>:$ENV{PATH}")
-endif()
-
 ExternalProject_Add(fontconfig
     GIT_REPOSITORY https://github.com/ScuffleCloud/fontconfig-mirror.git
     GIT_TAG f511346fe16f205f087a97faf32d3c7d07d5b3c8 # v2.16.1
@@ -42,7 +31,7 @@ ExternalProject_Add(fontconfig
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
         "PKG_CONFIG_PATH=$<TARGET_PROPERTY:libexpat,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libpng,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:zlib,PKG_CONFIG_PATH>:$<TARGET_PROPERTY:libfreetype,PKG_CONFIG_PATH>"
-        "PATH=${PATH_WITH_ADDITION}"
+        --modify "PATH=path_list_append:$<TARGET_PROPERTY:gperf,PATH>"
         --
         ${MESON_BIN} setup ${FONTCONFIG_BINARY_DIR}
         --prefix=${FONTCONFIG_INSTALL_DIR}
