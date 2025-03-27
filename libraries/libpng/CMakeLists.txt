@@ -26,11 +26,21 @@ add_external_target(libpng
   DEPENDS zlib
 )
 
+ExternalProject_Add_Step(
+    libpng
+    copy_find_png_cmake
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/FindPNG.cmake
+        ${libpng_INSTALL_DIR}/lib/cmake/PNG
+    DEPENDEES install
+    COMMENT "Copying FindPNG.cmake"
+)
+
 set_target_properties(libpng PROPERTIES
   LIBRARY_DIRECTORY ${libpng_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libpng_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libpng_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libpng_INSTALL_DIR}/lib/cmake/PNG
+  CMAKE_MODULE_PATH ${libpng_INSTALL_DIR}/lib/cmake/PNG
   LIBRARY_FILE ${libpng_INSTALL_DIR}/lib/libpng16${STATIC_LIBRARY_EXTENSION}
-
 )
