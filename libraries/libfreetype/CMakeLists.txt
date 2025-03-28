@@ -43,6 +43,6 @@ set_target_properties(libfreetype PROPERTIES
 # So we need to manually add the library paths and link the libraries
 if(WIN32)
   set_target_properties(libfreetype PROPERTIES
-    LDFLAGS "-L$<TARGET_PROPERTY:libpng,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:libbrotli,LIBRARY_DIRECTORY> -lpng -lz -lbrotli"
+    LDFLAGS "-l$<TARGET_PROPERTY:libpng,LIBRARY_FILE> -l$<TARGET_PROPERTY:libbrotli,DECODE_LIBRARY_FILE> -l$<TARGET_PROPERTY:libbrotli,COMMON_LIBRARY_FILE> -l$<TARGET_PROPERTY:zlib,LIBRARY_FILE>"
   )
 endif()

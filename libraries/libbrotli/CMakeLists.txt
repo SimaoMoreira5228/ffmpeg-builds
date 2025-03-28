@@ -22,8 +22,17 @@ add_external_target(libbrotli
     --config ${CMAKE_BUILD_TYPE}
 )
 
+if(WIN32)
+  set(lib_prefix "")
+else()
+  set(lib_prefix "lib")
+endif()
+
 set_target_properties(libbrotli PROPERTIES
   LIBRARY_DIRECTORY ${libbrotli_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libbrotli_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libbrotli_INSTALL_DIR}/lib/pkgconfig
+  DECODE_LIBRARY_FILE ${libbrotli_INSTALL_DIR}/lib/${lib_prefix}brotlidec${STATIC_LIBRARY_EXTENSION}
+  ENCODE_LIBRARY_FILE ${libbrotli_INSTALL_DIR}/lib/${lib_prefix}brotlienc${STATIC_LIBRARY_EXTENSION}
+  COMMON_LIBRARY_FILE ${libbrotli_INSTALL_DIR}/lib/${lib_prefix}brotlicommon${STATIC_LIBRARY_EXTENSION}
 )
