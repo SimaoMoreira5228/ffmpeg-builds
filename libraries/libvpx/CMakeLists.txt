@@ -3,11 +3,11 @@ project(libvpx)
 find_program(BASH_BIN bash REQUIRED)
 
 if(WIN32)
-    set(CONFIGURE_ARGS --enable-static-msvcrt --target=x86_64-win64-vs17)
+    set(CONFIGURE_ARGS --target=x86_64-win64-vs17 --enable-static-msvcrt)
 elseif(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(CONFIGURE_ARGS --target=arm64-darwin-gcc)
+    set(CONFIGURE_ARGS --target=arm64-darwin22-gcc)
 elseif(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CONFIGURE_ARGS --target=x86_64-darwin-gcc)
+    set(CONFIGURE_ARGS --target=x86_64-darwin22-gcc)
 elseif(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
     set(CONFIGURE_ARGS --target=arm64-linux-gcc)
 elseif(UNIX AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
@@ -19,9 +19,9 @@ endif()
 add_external_target(libvpx
     GIT_REPOSITORY https://github.com/webmproject/libvpx.git
     GIT_TAG 39e8b9dcd4696d9ac3ebd4722e012488382f1adb # v1.15.1-rc1
-    BUILD_IN_SOURCE TRUE
-    CONFIGURE_COMMAND ${BASH_BIN} ./configure
+    CONFIGURE_COMMAND ${BASH_BIN} <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
+        ${CONFIGURE_ARGS}
         --disable-shared
         --enable-static
         --disable-examples
@@ -35,7 +35,6 @@ add_external_target(libvpx
         --enable-multithread
         --as=yasm
         --enable-vp9-highbitdepth
-        ${CONFIGURE_ARGS}
     BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
 )
