@@ -2,12 +2,6 @@ project(fontconfig)
 
 find_program(MESON_BIN meson)
 
-# On Windows, the linker isnt able to resolve the dependencies of freetype
-# So we need to manually add the library paths and link the libraries
-if(WIN32)
-    set(EXTRA_LDFLAGS "LDFLAGS=-L$<TARGET_PROPERTY:libpng,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:libbrotli,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:libexpat,LIBRARY_DIRECTORY> -lpng -lz -lbrotli -lexpat")
-endif()
-
 add_external_target(fontconfig
     GIT_REPOSITORY https://github.com/ScuffleCloud/fontconfig-mirror.git
     GIT_TAG f511346fe16f205f087a97faf32d3c7d07d5b3c8 # v2.16.1

@@ -38,3 +38,9 @@ set_target_properties(libfreetype PROPERTIES
   CMAKE_PREFIX_PATH ${libfreetype_INSTALL_DIR}
   LIBRARY_FILE ${libfreetype_INSTALL_DIR}/lib/libfreetype${STATIC_LIBRARY_EXTENSION}
 )
+
+if(WIN32)
+  set_target_properties(libfreetype PROPERTIES
+    LDFLAGS "-L$<TARGET_PROPERTY:libpng,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY> -L$<TARGET_PROPERTY:libbrotli,LIBRARY_DIRECTORY> -lpng -lz -lbrotli -lexpat"
+  )
+endif()
