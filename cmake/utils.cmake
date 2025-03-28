@@ -139,6 +139,7 @@ function(add_external_target TARGET)
         LOG_INSTALL ON
         LOG_OUTPUT_ON_FAILURE ON
         BUILD_IN_SOURCE ${EXTERNAL_BUILD_IN_SOURCE}
+        UPDATE_DISCONNECTED ON
         PATCH_COMMAND ${CMAKE_COMMAND} -E env
             ${EXTERNAL_ENV_ARGS}
             --
