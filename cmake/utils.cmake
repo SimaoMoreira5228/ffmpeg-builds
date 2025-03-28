@@ -14,6 +14,7 @@ function(add_external_target TARGET)
         CONFIGURE_COMMAND
         BUILD_COMMAND
         INSTALL_COMMAND
+        PATCH_COMMAND
         DEPENDS
         ENV_ARGS
     )
@@ -36,13 +37,13 @@ function(add_external_target TARGET)
         unset(EXTERNAL_GIT_TAG)
     endif()
 
-    function(extend_env_var TARGET ENV_VAR LIST_NAME)
+    function(extend_env_var TARGET ENV_VAR LIST_NAME MODIFY)
         get_target_property(PROPERTY ${TARGET} ${ENV_VAR})
         if(PROPERTY)
             file(TO_CMAKE_PATH ${PROPERTY} PROPERTY_PATHS)
             set(ALL_ARGS "")
             foreach(PROPERTY_PATH ${PROPERTY_PATHS})
-                list(APPEND ALL_ARGS "--modify" "${ENV_VAR}=path_list_prepend:${PROPERTY_PATH}")
+                list(APPEND ALL_ARGS "--modify" "${ENV_VAR}=${MODIFY}:${PROPERTY_PATH}")
             endforeach()
             set(${LIST_NAME} "${${LIST_NAME}};${ALL_ARGS}" PARENT_SCOPE)
         endif()
@@ -62,13 +63,13 @@ function(add_external_target TARGET)
     endforeach()
 
     foreach(DEP ${DEPENDANCY_TREE})
-        extend_env_var(${DEP} PKG_CONFIG_PATH EXTERNAL_ENV_ARGS)
-        extend_env_var(${DEP} CMAKE_PREFIX_PATH EXTERNAL_ENV_ARGS)
-        extend_env_var(${DEP} CMAKE_MODULE_PATH EXTERNAL_ENV_ARGS)
-        extend_env_var(${DEP} CFLAGS EXTERNAL_ENV_ARGS)
-        extend_env_var(${DEP} CXXFLAGS EXTERNAL_ENV_ARGS)
-        extend_env_var(${DEP} CPPFLAGS EXTERNAL_ENV_ARGS)
-        extend_env_var(${DEP} LDFLAGS EXTERNAL_ENV_ARGS)
+        extend_env_var(${DEP} PKG_CONFIG_PATH EXTERNAL_ENV_ARGS path_list_prepend)
+        extend_env_var(${DEP} CMAKE_PREFIX_PATH EXTERNAL_ENV_ARGS path_list_prepend)
+        extend_env_var(${DEP} CMAKE_MODULE_PATH EXTERNAL_ENV_ARGS path_list_prepend)
+        extend_env_var(${DEP} CFLAGS EXTERNAL_ENV_ARGS string_append)
+        extend_env_var(${DEP} CXXFLAGS EXTERNAL_ENV_ARGS string_append)
+        extend_env_var(${DEP} CPPFLAGS EXTERNAL_ENV_ARGS string_append)
+        extend_env_var(${DEP} LDFLAGS EXTERNAL_ENV_ARGS string_append)
     endforeach()
 
     if(NOT EXTERNAL_CONFIGURE_COMMAND)
@@ -85,6 +86,10 @@ function(add_external_target TARGET)
 
     if(NOT EXTERNAL_UPDATE_COMMAND)
         set(EXTERNAL_UPDATE_COMMAND ${CMAKE_COMMAND} -E true)
+    endif()
+
+    if(NOT EXTERNAL_PATCH_COMMAND)
+        set(EXTERNAL_PATCH_COMMAND ${CMAKE_COMMAND} -E true)
     endif()
 
     if(NOT EXTERNAL_BUILD_IN_SOURCE)
@@ -134,6 +139,10 @@ function(add_external_target TARGET)
         LOG_INSTALL ON
         LOG_OUTPUT_ON_FAILURE ON
         BUILD_IN_SOURCE ${EXTERNAL_BUILD_IN_SOURCE}
+        PATCH_COMMAND ${CMAKE_COMMAND} -E env
+            ${EXTERNAL_ENV_ARGS}
+            --
+            ${EXTERNAL_PATCH_COMMAND}
         CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
             ${EXTERNAL_ENV_ARGS}
             --

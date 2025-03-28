@@ -28,7 +28,7 @@ add_external_target(fontconfig
 ExternalProject_Add_Step(
     fontconfig
     remove_shared_libs
-    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${fontconfig_INSTALL_DIR}/lib/libfontconfig${SHARED_LIBRARY_EXTENSION}* -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/remove_files_glob.cmake
+    COMMAND ${CMAKE_COMMAND} -DGLOB_PATH=${fontconfig_INSTALL_DIR}/lib/*${SHARED_LIBRARY_EXTENSION} -P ${FFMPEG_STATIC_BUILD_DIR}/cmake/remove_files_glob.cmake
     DEPENDEES install
     COMMENT "Removing fontconfig shared libraries"
 )

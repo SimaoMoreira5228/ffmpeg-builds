@@ -1,0 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4a97bd50e..acdb761e6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -944,7 +944,7 @@ endif()
+ # We use the same files like ./configure, so we have to set its vars.
+ # Only do this on Windows for Cygwin - the files don't make much sense
+ # outside of a UNIX look-alike.
+-if(NOT WIN32 OR CYGWIN OR MINGW)
++# if(NOT WIN32 OR CYGWIN OR MINGW)
+   set(prefix      ${CMAKE_INSTALL_PREFIX})
+   set(exec_prefix ${CMAKE_INSTALL_PREFIX})
+   set(libdir      ${CMAKE_INSTALL_FULL_LIBDIR})
+@@ -958,7 +958,7 @@ if(NOT WIN32 OR CYGWIN OR MINGW)
+                  ${CMAKE_CURRENT_BINARY_DIR}/libpng${PNGLIB_ABI_VERSION}-config
+                  @ONLY)
+   create_symlink(libpng-config FILE libpng${PNGLIB_ABI_VERSION}-config)
+-endif()
++# endif()
+ 
+ # Install.
+ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
+@@ -1014,7 +1014,7 @@ if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL)
+   install(FILES png.5
+           DESTINATION ${CMAKE_INSTALL_MANDIR}/man5)
+   # Install the pkg-config files.
+-  if(NOT CMAKE_HOST_WIN32 OR CYGWIN OR MINGW)
++  # if(NOT CMAKE_HOST_WIN32 OR CYGWIN OR MINGW)
+     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpng.pc
+             DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/libpng-config
+@@ -1023,7 +1023,7 @@ if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL)
+             DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/libpng${PNGLIB_ABI_VERSION}-config
+             DESTINATION ${CMAKE_INSTALL_BINDIR})
+-  endif()
++  # endif()
+ endif()
+ 
+ # Create an export file that CMake users can include() to import our targets.

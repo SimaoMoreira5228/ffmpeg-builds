@@ -2,6 +2,15 @@ project(libass)
 
 find_program(MESON_BIN meson)
 
+if(WIN32)
+    set(fontconfig disabled)
+    set(directwrite enabled)
+else()
+    set(fontconfig enabled)
+    set(directwrite disabled)
+    set(ADDITIONAL_DEPS fontconfig)
+endif()
+
 add_external_target(libass
     GIT_REPOSITORY https://github.com/libass/libass.git
     GIT_TAG e46aedea0a0d17da4c4ef49d84b94a7994664ab5
@@ -14,11 +23,13 @@ add_external_target(libass
         --buildtype=release
         --default-library=static
         --wrap-mode=nodownload
+        -Dfontconfig=${fontconfig}
+        -Ddirectwrite=${directwrite}
         -Dtest=false
         -Dlibunibreak=disabled
     BUILD_COMMAND ${MESON_BIN} compile -C build
     INSTALL_COMMAND ${MESON_BIN} install -C build
-    DEPENDS fribidi fontconfig libfreetype harfbuzz
+    DEPENDS fribidi libfreetype harfbuzz ${ADDITIONAL_DEPS}
 )
 
 set_target_properties(libass PROPERTIES

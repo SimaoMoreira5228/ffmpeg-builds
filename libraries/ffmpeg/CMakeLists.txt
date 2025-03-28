@@ -54,7 +54,7 @@ add_external_target(ffmpeg
         ${FFMPEG_EXTRA_CONFIG_ARGS}
     BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
-    DEPENDS ${FFMPEG_DEPENDENCIES} harfbuzz libogg fribidi fontconfig libexpat
+    DEPENDS ${FFMPEG_DEPENDENCIES}
 )
 
 ExternalProject_Add_Step(

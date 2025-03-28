@@ -1,8 +1,13 @@
 project(libpng)
 
+if(WIN32)
+  set(PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/windows-pkg-config.diff)
+endif()
+
 add_external_target(libpng
   GIT_REPOSITORY https://github.com/glennrp/libpng.git
   GIT_TAG 872555f4ba910252783af1507f9e7fe1653be252 # v1.6.47
+  PATCH_COMMAND ${PATCH_COMMAND}
   CONFIGURE_COMMAND ${CMAKE_COMMAND}
     -G${CMAKE_GENERATOR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -26,10 +31,16 @@ add_external_target(libpng
   DEPENDS zlib
 )
 
+if(WIN32)
+  set(library_file libpng16_static${STATIC_LIBRARY_EXTENSION})
+else()
+  set(library_file libpng16${STATIC_LIBRARY_EXTENSION})
+endif()
+
 set_target_properties(libpng PROPERTIES
   LIBRARY_DIRECTORY ${libpng_INSTALL_DIR}/lib
   INCLUDE_DIRECTORY ${libpng_INSTALL_DIR}/include
   PKG_CONFIG_PATH ${libpng_INSTALL_DIR}/lib/pkgconfig
   CMAKE_PREFIX_PATH ${libpng_INSTALL_DIR}
-  LIBRARY_FILE ${libpng_INSTALL_DIR}/lib/libpng16${STATIC_LIBRARY_EXTENSION}
+  LIBRARY_FILE ${libpng_INSTALL_DIR}/lib/${library_file}
 )
