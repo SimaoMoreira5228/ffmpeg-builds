@@ -14,7 +14,26 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-find_program(PERL_BIN perl)
+find_program(PERL_BIN perl REQUIRED)
+
+if(WIN32)
+    find_program(MAKE_BIN jom)
+    if(MAKE_BIN_NOTFOUND)
+        message(STATUS "jom not found, using nmake")
+        find_program(MAKE_BIN nmake REQUIRED)
+    else()
+        set(MAKE_ARGS /J $ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+        set(CONFIGURE_ARGS /FS)
+    endif()
+
+    set(ZLIB_LIB $<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>/zlib.lib)
+else()
+    find_program(MAKE_BIN make REQUIRED)
+    set(MAKE_ARGS -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL})
+
+    set(ZLIB_LIB $<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>)
+    set(CONFIGURE_ARGS -fPIC)
+endif()
 
 add_external_target(openssl
     GIT_REPOSITORY https://github.com/openssl/openssl.git
@@ -28,11 +47,11 @@ add_external_target(openssl
             no-docs
             no-tests
             zlib
-            -fPIC
             --with-zlib-include=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
-            --with-zlib-lib=$<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>
-    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
-    INSTALL_COMMAND make install
+            --with-zlib-lib=${ZLIB_LIB}
+            ${CONFIGURE_ARGS}
+    BUILD_COMMAND ${MAKE_BIN} ${MAKE_ARGS}
+    INSTALL_COMMAND ${MAKE_BIN} install
     DEPENDS zlib
 )
 

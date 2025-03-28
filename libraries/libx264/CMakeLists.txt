@@ -1,6 +1,6 @@
 project(libx264)
 
-find_program(BASH_BIN bash)
+find_program(BASH_BIN bash REQUIRED)
 
 add_external_target(libx264
     GIT_REPOSITORY https://github.com/ScuffleCloud/x264-mirror.git

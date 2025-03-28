@@ -1,6 +1,6 @@
 project(libass)
 
-find_program(MESON_BIN meson)
+find_program(MESON_BIN meson REQUIRED)
 
 if(WIN32)
     set(fontconfig disabled)

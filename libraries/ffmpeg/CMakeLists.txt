@@ -25,7 +25,7 @@ foreach(dependency IN LISTS FFMPEG_DEPENDENCIES)
     list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--enable-${dependency}")
 endforeach()
 
-find_program(BASH_BIN bash)
+find_program(BASH_BIN bash REQUIRED)
 
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--enable-x86asm")

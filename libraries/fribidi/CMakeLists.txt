@@ -1,6 +1,6 @@
 project(fribidi)
 
-find_program(MESON_BIN meson)
+find_program(MESON_BIN meson REQUIRED)
 
 add_external_target(fribidi
     GIT_REPOSITORY https://github.com/fribidi/fribidi.git

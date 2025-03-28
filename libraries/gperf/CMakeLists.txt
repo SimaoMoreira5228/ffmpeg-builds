@@ -1,6 +1,6 @@
 project(gperf)
 
-find_program(BASH_BIN bash)
+find_program(BASH_BIN bash REQUIRED)
 
 add_external_target(gperf
     URL https://ftp.gnu.org/gnu/gperf/gperf-3.1.tar.gz

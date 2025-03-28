@@ -1,6 +1,6 @@
 project(fontconfig)
 
-find_program(MESON_BIN meson)
+find_program(MESON_BIN meson REQUIRED)
 
 add_external_target(fontconfig
     GIT_REPOSITORY https://github.com/ScuffleCloud/fontconfig-mirror.git

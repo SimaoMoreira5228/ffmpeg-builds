@@ -1,6 +1,6 @@
 project(libvpx)
 
-find_program(BASH_BIN bash)
+find_program(BASH_BIN bash REQUIRED)
 
 add_external_target(libvpx
     GIT_REPOSITORY https://github.com/webmproject/libvpx.git

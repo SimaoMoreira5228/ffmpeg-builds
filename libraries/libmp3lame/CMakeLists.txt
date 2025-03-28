@@ -1,6 +1,6 @@
 project(libmp3lame)
 
-find_program(BASH_BIN bash)
+find_program(BASH_BIN bash REQUIRED)
 
 add_external_target(libmp3lame
     URL https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
