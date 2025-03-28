@@ -3,13 +3,7 @@ project(libx264)
 find_program(BASH_BIN bash REQUIRED)
 
 if(WIN32)
-    set(CMAKE_C_COMPILER_PATH cl)
-    set(CMAKE_CXX_COMPILER_PATH cl)
-    set(CMAKE_LINKER_PATH link)
-else()
-    set(CMAKE_C_COMPILER_PATH ${CMAKE_C_COMPILER})
-    set(CMAKE_CXX_COMPILER_PATH ${CMAKE_CXX_COMPILER})
-    set(CMAKE_LINKER_PATH ${CMAKE_LINKER})
+    set(ENV_ARGS "CC=cl" "CXX=cl" "LD=link")
 endif()
 
 add_external_target(libx264
@@ -23,10 +17,7 @@ add_external_target(libx264
         --enable-pic
     BUILD_COMMAND make lib-static -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install-lib-static
-    ENV_ARGS
-        "CC=${CMAKE_C_COMPILER_PATH}"
-        "CXX=${CMAKE_CXX_COMPILER_PATH}"
-        "LD=${CMAKE_LINKER_PATH}"
+    ENV_ARGS ${ENV_ARGS}
 )
 
 set_target_properties(libx264 PROPERTIES

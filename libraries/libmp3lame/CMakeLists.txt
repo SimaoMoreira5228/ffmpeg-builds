@@ -5,8 +5,7 @@ find_program(BASH_BIN bash REQUIRED)
 add_external_target(libmp3lame
     URL https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
     URL_HASH SHA256=ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e
-    BUILD_IN_SOURCE TRUE
-    CONFIGURE_COMMAND ${BASH_BIN} ./configure
+    CONFIGURE_COMMAND ${BASH_BIN} <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
         --enable-static
         --disable-shared

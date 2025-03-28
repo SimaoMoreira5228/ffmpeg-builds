@@ -38,9 +38,8 @@ endif()
 add_external_target(openssl
     GIT_REPOSITORY https://github.com/openssl/openssl.git
     GIT_TAG 0c6656a7a31492ddd61e3d0d8b0e66645f4b2d6f # v3.5.0-beta1
-    BUILD_IN_SOURCE TRUE
     CONFIGURE_COMMAND ${PERL_BIN} 
-        ./Configure ${OPENSSL_CONFIG}
+        <SOURCE_DIR>/Configure ${OPENSSL_CONFIG}
             --prefix=<INSTALL_DIR>
             --openssldir=<INSTALL_DIR>/ssl
             no-shared

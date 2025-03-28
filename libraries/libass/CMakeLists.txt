@@ -14,9 +14,8 @@ endif()
 add_external_target(libass
     GIT_REPOSITORY https://github.com/libass/libass.git
     GIT_TAG e46aedea0a0d17da4c4ef49d84b94a7994664ab5
-    BUILD_IN_SOURCE TRUE
     CONFIGURE_COMMAND ${MESON_BIN}
-        setup build
+        setup <BINARY_DIR> <SOURCE_DIR>
         --prefix=<INSTALL_DIR>
         --optimization=3
         --libdir=lib
@@ -27,8 +26,8 @@ add_external_target(libass
         -Ddirectwrite=${directwrite}
         -Dtest=false
         -Dlibunibreak=disabled
-    BUILD_COMMAND ${MESON_BIN} compile -C build
-    INSTALL_COMMAND ${MESON_BIN} install -C build
+    BUILD_COMMAND ${MESON_BIN} compile -C <BINARY_DIR>
+    INSTALL_COMMAND ${MESON_BIN} install -C <BINARY_DIR>
     DEPENDS fribidi libfreetype harfbuzz ${ADDITIONAL_DEPS}
 )
 

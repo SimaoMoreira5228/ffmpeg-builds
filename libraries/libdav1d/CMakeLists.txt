@@ -5,9 +5,8 @@ find_program(MESON_BIN meson REQUIRED)
 add_external_target(libdav1d
     GIT_REPOSITORY https://github.com/videolan/dav1d.git
     GIT_TAG 42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa
-    BUILD_IN_SOURCE TRUE
     CONFIGURE_COMMAND ${MESON_BIN}
-        setup build
+        setup <BINARY_DIR> <SOURCE_DIR>
         --prefix=<INSTALL_DIR>
         --optimization=3
         --libdir=lib
@@ -16,8 +15,8 @@ add_external_target(libdav1d
         --wrap-mode=nodownload
         -Denable_tools=false
         -Denable_tests=false
-    BUILD_COMMAND ${MESON_BIN} compile -C build
-    INSTALL_COMMAND ${MESON_BIN} install -C build
+    BUILD_COMMAND ${MESON_BIN} compile -C <BINARY_DIR>
+    INSTALL_COMMAND ${MESON_BIN} install -C <BINARY_DIR>
 )
 
 set_target_properties(libdav1d PROPERTIES

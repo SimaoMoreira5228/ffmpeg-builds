@@ -38,8 +38,7 @@ endif()
 add_external_target(ffmpeg
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
     GIT_TAG ${FFMPEG_TAG}
-    BUILD_IN_SOURCE TRUE
-    CONFIGURE_COMMAND ${BASH_BIN} ./configure
+    CONFIGURE_COMMAND ${BASH_BIN} <SOURCE_DIR>/configure
         "--extra-libs=-lpthread -lm"
         --prefix=<INSTALL_DIR>
         --disable-static

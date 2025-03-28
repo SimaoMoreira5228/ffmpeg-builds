@@ -32,7 +32,7 @@ function build_ffmpeg() {
     local tar_name="ffmpeg-$tag-$OS-$ARCH"
     echo "::group::Building ffmpeg $tag"
 
-    cmake -GNinja -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag -DCMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} -DPERL_BIN=${perl}
+    cmake -GNinja -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag -DPERL_BIN=${perl}
     cmake --build build --config Release --parallel ${CMAKE_BUILD_PARALLEL_LEVEL} --target install
 
     mkdir -p tmp/$tar_name
