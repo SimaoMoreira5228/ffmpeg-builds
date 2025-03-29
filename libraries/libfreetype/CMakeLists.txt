@@ -24,10 +24,8 @@ add_external_target(
     -DZLIB_INCLUDE_DIR=$<TARGET_PROPERTY:zlib,INCLUDE_DIRECTORY>
     -DZLIB_LIBRARY=$<TARGET_PROPERTY:zlib,LIBRARY_FILE>
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
   DEPENDS zlib libpng libbrotli
 )
 

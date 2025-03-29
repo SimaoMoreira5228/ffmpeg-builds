@@ -8,10 +8,10 @@ ARCH=$(uname -m)
 
 case $OS in
     Darwin | Linux)
-        perl=$(which perl)
+        perl="perl"
         ;;
     CYGWIN* | MINGW* | MSYS*)
-        perl="/c/Strawberry/perl/bin/perl"
+        export PATH="~/scoop/apps/perl/current/perl/bin:$PATH"
         ;;
     *)
         echo "Unsupported OS: $OS"

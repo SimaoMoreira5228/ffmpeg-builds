@@ -16,9 +16,17 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+if(WIN32)
+  set(PATCH_COMMAND git apply ${CMAKE_CURRENT_SOURCE_DIR}/patches/windows-path-limit.diff)
+  set(ENV_ARGS "CFLAGS=/O2 /Ob2 /DNDEBUG")
+else()
+    set(ENV_ARGS "CFLAGS=-O3")
+endif()
+
 add_external_target(libvpx
     GIT_REPOSITORY https://github.com/webmproject/libvpx.git
     GIT_TAG 39e8b9dcd4696d9ac3ebd4722e012488382f1adb # v1.15.1-rc1
+    PATCH_COMMAND ${PATCH_COMMAND}
     CONFIGURE_COMMAND ${BASH_BIN} <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
         ${CONFIGURE_ARGS}
@@ -27,6 +35,9 @@ add_external_target(libvpx
         --disable-examples
         --disable-tools
         --disable-docs
+        --disable-debug-libs
+        --disable-debug
+        --enable-runtime-cpu-detect
         --disable-unit_tests
         --disable-decode_perf_tests
         --disable-encode_perf_tests
@@ -37,6 +48,7 @@ add_external_target(libvpx
         --enable-vp9-highbitdepth
     BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND make install
+    ENV_ARGS ${ENV_ARGS}
 )
 
 set_target_properties(libvpx PROPERTIES

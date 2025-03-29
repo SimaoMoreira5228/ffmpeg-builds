@@ -15,12 +15,11 @@ add_external_target(libogg
     -DCMAKE_INSTALL_SHAREDIR=share
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     -DBUILD_SHARED_LIBS=OFF
+    -DCMAKE_POLICY_VERSION_MINIMUM=2.8
     "-DCMAKE_LD_FLAGS=-lm -pthread"
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 set_target_properties(libogg PROPERTIES

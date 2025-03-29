@@ -16,10 +16,8 @@ add_external_target(libx265
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     -DENABLE_SHARED=OFF
     <SOURCE_DIR>/source
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 set_target_properties(libx265 PROPERTIES

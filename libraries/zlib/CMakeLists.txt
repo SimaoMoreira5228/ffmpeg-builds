@@ -17,7 +17,8 @@ add_external_target(zlib
     -DBUILD_SHARED_LIBS=OFF
     -DZLIB_BUILD_EXAMPLES=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 ExternalProject_Add_Step(

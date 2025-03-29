@@ -23,7 +23,7 @@ if(WIN32)
         find_program(MAKE_BIN nmake REQUIRED)
     else()
         set(MAKE_ARGS /J $ENV{CMAKE_BUILD_PARALLEL_LEVEL})
-        set(CONFIGURE_ARGS /FS)
+        set(CONFIGURE_ARGS /FS /O2 /Ob2 /DNDEBUG)
     endif()
 
     set(ZLIB_LIB $<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>/zlib.lib)
@@ -32,7 +32,7 @@ else()
     set(MAKE_ARGS -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL})
 
     set(ZLIB_LIB $<TARGET_PROPERTY:zlib,LIBRARY_DIRECTORY>)
-    set(CONFIGURE_ARGS -fPIC)
+    set(CONFIGURE_ARGS -fPIC -O3)
 endif()
 
 add_external_target(openssl

@@ -1,6 +1,8 @@
 project(libvorbis)
 
-set(CMAKE_LD_FLAGS )
+if(UNIX)
+    set(CONFIGURE_ARGS "-DCMAKE_LD_FLAGS=-lm -pthread")
+endif()
 
 add_external_target(
   libvorbis
@@ -15,12 +17,10 @@ add_external_target(
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_SHAREDIR=share
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-    "-DCMAKE_LD_FLAGS=-lm -pthread"
+    ${CONFIGURE_ARGS}
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
   DEPENDS libogg
 )
 

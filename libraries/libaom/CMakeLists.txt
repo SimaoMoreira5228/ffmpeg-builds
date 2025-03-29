@@ -20,10 +20,8 @@ add_external_target(libaom
     -DENABLE_EXAMPLES=OFF
     -DENABLE_TOOLS=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 set_target_properties(libaom PROPERTIES

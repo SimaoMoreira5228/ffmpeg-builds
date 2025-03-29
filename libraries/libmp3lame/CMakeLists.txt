@@ -1,6 +1,12 @@
 project(libmp3lame)
 
-find_program(BASH_BIN bash REQUIRED)
+if(WIN32)
+    set(ENV_ARGS "LD=link")
+else()
+    set(ENV_ARGS "CFLAGS=-O3")
+endif()
+
+find_program(MAKE_BIN make REQUIRED)
 
 add_external_target(libmp3lame
     URL https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
@@ -9,13 +15,14 @@ add_external_target(libmp3lame
         --prefix=<INSTALL_DIR>
         --enable-static
         --disable-shared
-        --enable-nasm
         --disable-gtktest
         --disable-frontend
-        --with-pic
-    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
-    INSTALL_COMMAND make install
+        # --enable-nasm
+        # --with-pic
+    BUILD_COMMAND ${MAKE_BIN} -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
+    INSTALL_COMMAND ${MAKE_BIN} install
     DEPENDS zlib
+    ENV_ARGS ${ENV_ARGS}
 )
 
 set(LIBMP3LAME_PKG_OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/libmp3lame.pc)

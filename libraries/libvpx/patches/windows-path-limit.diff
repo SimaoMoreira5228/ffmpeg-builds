@@ -1,0 +1,123 @@
+diff --git a/build/make/gen_msvs_vcxproj.sh b/build/make/gen_msvs_vcxproj.sh
+index 1e1db05bb..ea8ba58b9 100755
+--- a/build/make/gen_msvs_vcxproj.sh
++++ b/build/make/gen_msvs_vcxproj.sh
+@@ -36,6 +36,7 @@ Options:
+     --module-def=filename       File containing export definitions (for DLLs)
+     --ver=version               Version (14-16) of visual studio to generate for
+     --src-path-bare=dir         Path to root of source tree
++    --filelist=filename         File containing list of files to include
+     -Ipath/to/include           Additional include directories
+     -DFLAG[=value]              Preprocessor macros to define
+     -Lpath/to/lib               Additional library search paths
+@@ -186,6 +187,17 @@ for opt in "$@"; do
+                 ;;
+             esac
+         ;;
++        --filelist=*)
++            path_to_filelist="$optval"
++            if [[ -f "$path_to_filelist" ]]; then
++                while IFS= read -r file; do
++                    file_list+=("$file")
++                done < "$path_to_filelist"
++            else
++                echo "File list not found: $path_to_filelist" >&2
++                exit 1
++            fi
++        ;;
+         -I*)
+             opt=${opt##-I}
+             opt=$(fix_path "$opt")
+diff --git a/libs.mk b/libs.mk
+index f68ad6cef..20ad7d172 100644
+--- a/libs.mk
++++ b/libs.mk
+@@ -234,7 +234,33 @@ CLEAN-OBJS += vpx.def
+ 
+ vpx.$(VCPROJ_SFX): VCPROJ_SRCS=$(filter-out $(addprefix %, $(ASM_INCLUDES)), $^)
+ 
+-vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
++filelist-vpx.txt: $(CODEC_SRCS) vpx.def
++	@echo "    [CREATE] $@"
++	@$(foreach f, \
++	  $(filter $(SRC_PATH_BARE)/vp8/%.c, $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++	@$(foreach f, \
++	  $(filter $(SRC_PATH_BARE)/vp8/%.h, $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++	@$(foreach f, \
++	  $(filter $(SRC_PATH_BARE)/vp9/%.c, $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++	@$(foreach f, \
++	  $(filter $(SRC_PATH_BARE)/vp9/%.h, $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++	@$(foreach f, \
++	  $(filter $(SRC_PATH_BARE)/vpx/%, $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++	@$(foreach f, \
++	  $(filter $(SRC_PATH_BARE)/vpx_dsp/%, $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++	@$(foreach f, \
++	  $(filter-out $(addprefix $(SRC_PATH_BARE)/, \
++	    vp8/%.c vp8/%.h vp9/%.c vp9/%.h vpx/% vpx_dsp/%), \
++	    $(VCPROJ_SRCS)), \
++	  echo $(f) >> $@;)
++
++vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def filelist-vpx.txt
+ 	@echo "    [CREATE] $@"
+ 	$(qexec)$(GEN_VCPROJ) \
+             $(if $(CONFIG_SHARED),--dll,--lib) \
+@@ -247,15 +273,7 @@ vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
+             --src-path-bare="$(SRC_PATH_BARE)" \
+             --out=$@ $(CFLAGS) \
+             --as=$(AS) \
+-            $(filter $(SRC_PATH_BARE)/vp8/%.c, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vp8/%.h, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vp9/%.c, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vp9/%.h, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vpx/%, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vpx_dsp/%, $(VCPROJ_SRCS)) \
+-            $(filter-out $(addprefix $(SRC_PATH_BARE)/, \
+-                           vp8/%.c vp8/%.h vp9/%.c vp9/%.h vpx/% vpx_dsp/%), \
+-              $(VCPROJ_SRCS)) \
++            --filelist=filelist-vpx.txt \
+             --src-path-bare="$(SRC_PATH_BARE)" \
+ 
+ PROJECTS-yes += vpx.$(VCPROJ_SFX)
+@@ -266,7 +284,18 @@ vpx.$(VCPROJ_SFX): $(RTCD)
+ vpxrc.$(VCPROJ_SFX): \
+     VCPROJ_SRCS=$(filter-out $(addprefix %, $(ASM_INCLUDES)), $^)
+ 
+-vpxrc.$(VCPROJ_SFX): $(RC_RTC_SRCS)
++filelist-vpxrc.txt: $(RC_RTC_SRCS)
++	@echo "    [CREATE] $@"
++	@$(foreach f,$(filter $(SRC_PATH_BARE)/vp9/%.c, $(VCPROJ_SRCS)),echo $(f) >> $@;)
++	@$(foreach f,$(filter $(SRC_PATH_BARE)/vp9/%.cc, $(VCPROJ_SRCS)),echo $(f) >> $@;)
++	@$(foreach f,$(filter $(SRC_PATH_BARE)/vp9/%.h, $(VCPROJ_SRCS)),echo $(f) >> $@;)
++	@$(foreach f,$(filter $(SRC_PATH_BARE)/vpx/%, $(VCPROJ_SRCS)),echo $(f) >> $@;)
++	@$(foreach f,$(filter $(SRC_PATH_BARE)/vpx_dsp/%, $(VCPROJ_SRCS)),echo $(f) >> $@;)
++	@$(foreach f,$(filter-out $(addprefix $(SRC_PATH_BARE)/, \
++		vp8/%.c vp8/%.h vp9/%.c vp9/%.cc vp9/%.h vpx/% vpx_dsp/%), \
++		$(VCPROJ_SRCS)),echo $(f) >> $@;)
++
++vpxrc.$(VCPROJ_SFX): $(RC_RTC_SRCS) filelist-vpxrc.txt
+ 	@echo "    [CREATE] $@"
+ 	$(qexec)$(GEN_VCPROJ) \
+             $(if $(CONFIG_SHARED),--dll,--lib) \
+@@ -278,15 +307,7 @@ vpxrc.$(VCPROJ_SFX): $(RC_RTC_SRCS)
+             --src-path-bare="$(SRC_PATH_BARE)" \
+             --out=$@ $(CFLAGS) \
+             --as=$(AS) \
+-            $(filter $(SRC_PATH_BARE)/vp9/%.c, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vp9/%.cc, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vp9/%.h, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vpx/%, $(VCPROJ_SRCS)) \
+-            $(filter $(SRC_PATH_BARE)/vpx_dsp/%, $(VCPROJ_SRCS)) \
+-            $(filter-out $(addprefix $(SRC_PATH_BARE)/, \
+-                           vp8/%.c vp8/%.h vp9/%.c vp9/%.cc vp9/%.h vpx/% \
+-                           vpx_dsp/%), \
+-              $(VCPROJ_SRCS)) \
++            --filelist=filelist-vpxrc.txt \
+             --src-path-bare="$(SRC_PATH_BARE)" \
+ 
+ PROJECTS-yes += vpxrc.$(VCPROJ_SFX)

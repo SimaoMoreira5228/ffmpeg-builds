@@ -3,7 +3,9 @@ project(libx264)
 find_program(BASH_BIN bash REQUIRED)
 
 if(WIN32)
-    set(ENV_ARGS "CC=cl" "CXX=cl" "LD=link")
+    set(ENV_ARGS "CC=cl" "CXX=cl" "LD=link" )
+else()
+    set(ENV_ARGS "CFLAGS=-O3")
 endif()
 
 add_external_target(libx264
@@ -12,6 +14,8 @@ add_external_target(libx264
     CONFIGURE_COMMAND ${BASH_BIN} <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
         --disable-opencl
+        --disable-cli
+        --enable-strip
         --enable-static
         --disable-bashcompletion
         --enable-pic

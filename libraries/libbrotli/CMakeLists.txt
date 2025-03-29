@@ -16,10 +16,8 @@ add_external_target(libbrotli
     -DBUILD_TESTING=OFF
     -DBUILD_EXAMPLES=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 if(WIN32)

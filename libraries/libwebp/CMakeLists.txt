@@ -26,7 +26,8 @@ add_external_target(libwebp
     -DWEBP_BUILD_EXTRAS=OFF
     -DWEBP_BUILD_FUZZTEST=OFF
     <SOURCE_DIR>
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . --target install --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 set_target_properties(libwebp PROPERTIES

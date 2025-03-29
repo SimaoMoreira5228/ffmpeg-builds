@@ -20,10 +20,8 @@ add_external_target(libexpat
     -DEXPAT_BUILD_TESTS=OFF
     -DEXPAT_SHARED_LIBS=OFF
     <SOURCE_DIR>/expat
-  BUILD_COMMAND ${CMAKE_COMMAND}
-    --build .
-    --target install
-    --config ${CMAKE_BUILD_TYPE}
+  BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE}
+  INSTALL_COMMAND ${CMAKE_COMMAND} --install .
 )
 
 set_target_properties(libexpat PROPERTIES
