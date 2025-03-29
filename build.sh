@@ -1,8 +1,6 @@
 #!/bin/env bash
 set -eo pipefail
 
-export PKG_CONFIG="pkg-config --static"
-
 OS=$(uname -s)
 ARCH=$(uname -m)
 
