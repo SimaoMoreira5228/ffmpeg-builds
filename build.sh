@@ -1,11 +1,13 @@
 #!/bin/env bash
 set -eo pipefail
 
+
 OS=$(uname -s)
 ARCH=$(uname -m)
 
 case $OS in
     Darwin | Linux)
+        export PKG_CONFIG="pkg-config --static"
         perl="perl"
         ;;
     CYGWIN* | MINGW* | MSYS*)
