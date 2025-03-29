@@ -33,9 +33,6 @@ endif()
 
 if(WIN32)
     list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--arch=x86_64" "--target-os=win64" "--toolchain=msvc")
-    set(ENV_ARGS "CFLAGS=/O2 /Ob2 /Gy /DNDEBUG")
-else()
-    set(ENV_ARGS "CFLAGS=-O3")
 endif()
 
 add_external_target(ffmpeg
