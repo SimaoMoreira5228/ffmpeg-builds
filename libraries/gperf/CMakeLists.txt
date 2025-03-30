@@ -1,7 +1,5 @@
 project(gperf)
 
-find_program(BASH_BIN bash REQUIRED)
-
 if(WIN32)
     set(ENV_ARGS "CFLAGS=/O2 /Ob2 /Gy /DNDEBUG")
 else()

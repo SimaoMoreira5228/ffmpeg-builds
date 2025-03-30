@@ -1,7 +1,5 @@
 project(fribidi)
 
-find_program(MESON_BIN meson REQUIRED)
-
 add_external_target(fribidi
     GIT_REPOSITORY https://github.com/fribidi/fribidi.git
     GIT_TAG 68162babff4f39c4e2dc164a5e825af93bda9983 # v1.0.16

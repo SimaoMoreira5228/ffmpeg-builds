@@ -31,6 +31,16 @@ else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
+find_program(BASH_BIN bash)
+find_program(MAKE_BIN make)
+find_program(MESON_BIN meson)
+find_program(PERL_BIN perl)
+
+if(WIN32)
+    find_program(JOM_BIN jom)
+    find_program(NMAKE_BIN nmake)
+endif()
+
 add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
 add_subdirectory(libraries/fribidi EXCLUDE_FROM_ALL)
 add_subdirectory(libraries/libexpat EXCLUDE_FROM_ALL)

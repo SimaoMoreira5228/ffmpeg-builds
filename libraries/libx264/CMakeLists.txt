@@ -1,7 +1,5 @@
 project(libx264)
 
-find_program(BASH_BIN bash REQUIRED)
-
 if(WIN32)
     set(ENV_ARGS "CC=cl" "CXX=cl" "LD=link" )
 else()
@@ -19,8 +17,8 @@ add_external_target(libx264
         --enable-static
         --disable-bashcompletion
         --enable-pic
-    BUILD_COMMAND make lib-static -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
-    INSTALL_COMMAND make install-lib-static
+    BUILD_COMMAND ${MAKE_BIN} -f <SOURCE_DIR>/Makefile lib-static -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
+    INSTALL_COMMAND ${MAKE_BIN} -f <SOURCE_DIR>/Makefile install-lib-static
     ENV_ARGS ${ENV_ARGS}
 )
 

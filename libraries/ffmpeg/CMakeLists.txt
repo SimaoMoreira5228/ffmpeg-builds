@@ -25,8 +25,6 @@ foreach(dependency IN LISTS FFMPEG_DEPENDENCIES)
     list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--enable-${dependency}")
 endforeach()
 
-find_program(BASH_BIN bash REQUIRED)
-
 if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     list(APPEND FFMPEG_EXTRA_CONFIG_ARGS "--enable-x86asm")
 endif()
@@ -51,8 +49,8 @@ add_external_target(ffmpeg
         --enable-openssl
         --disable-autodetect
         ${FFMPEG_EXTRA_CONFIG_ARGS}
-    BUILD_COMMAND make -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
-    INSTALL_COMMAND make install
+    BUILD_COMMAND ${MAKE_BIN} -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
+    INSTALL_COMMAND ${MAKE_BIN} install
     DEPENDS ${FFMPEG_DEPENDENCIES}
     ENV_ARGS ${ENV_ARGS}
 )

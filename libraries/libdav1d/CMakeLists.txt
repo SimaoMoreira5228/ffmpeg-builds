@@ -1,7 +1,5 @@
 project(libdav1d)
 
-find_program(MESON_BIN meson REQUIRED)
-
 add_external_target(libdav1d
     GIT_REPOSITORY https://github.com/videolan/dav1d.git
     GIT_TAG 42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa

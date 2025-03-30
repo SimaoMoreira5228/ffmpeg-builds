@@ -1,7 +1,5 @@
 project(libvpx)
 
-find_program(BASH_BIN bash REQUIRED)
-
 if(WIN32)
     set(CONFIGURE_ARGS --target=x86_64-win64-vs17 --enable-static-msvcrt)
 elseif(APPLE AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")

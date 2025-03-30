@@ -1,7 +1,5 @@
 project(libass)
 
-find_program(MESON_BIN meson REQUIRED)
-
 if(WIN32)
     set(fontconfig disabled)
     set(directwrite enabled)

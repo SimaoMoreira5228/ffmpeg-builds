@@ -4,9 +4,8 @@ if(WIN32)
     set(ENV_ARGS "LD=link")
 else()
     set(ENV_ARGS "CFLAGS=-O3")
+    set(CONFIGURE_ARGS "--with-pic" "--enable-nasm")
 endif()
-
-find_program(MAKE_BIN make REQUIRED)
 
 add_external_target(libmp3lame
     URL https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
@@ -17,8 +16,7 @@ add_external_target(libmp3lame
         --disable-shared
         --disable-gtktest
         --disable-frontend
-        # --enable-nasm
-        # --with-pic
+        ${CONFIGURE_ARGS}
     BUILD_COMMAND ${MAKE_BIN} -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND ${MAKE_BIN} install
     DEPENDS zlib

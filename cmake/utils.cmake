@@ -124,7 +124,6 @@ function(add_external_target TARGET)
         set(${TARGET}_BUILD_DIR ${BUILD_DIR} PARENT_SCOPE)
     endif()
 
-    
     message(STATUS "Adding external target ${TARGET}")
 
     ExternalProject_Add(${TARGET}
