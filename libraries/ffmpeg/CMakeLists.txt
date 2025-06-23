@@ -48,6 +48,7 @@ add_external_target(ffmpeg
         --enable-version3
         --enable-openssl
         --disable-autodetect
+        --disable-doc
         ${FFMPEG_EXTRA_CONFIG_ARGS}
     BUILD_COMMAND ${MAKE_BIN} -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
     INSTALL_COMMAND ${MAKE_BIN} install
