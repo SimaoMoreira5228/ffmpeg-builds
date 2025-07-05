@@ -125,6 +125,22 @@ function(add_external_target TARGET)
     endif()
 
     message(STATUS "Adding external target ${TARGET}")
+    if(WIN32)
+        file(TO_CMAKE_PATH  "${PREFIX}" PREFIX_CMAKE)
+        set(PREFIX "${PREFIX_CMAKE}")
+        file(TO_CMAKE_PATH  "${TMP_DIR}" TMP_DIR_CMAKE)
+        set(TMP_DIR "${TMP_DIR_CMAKE}")
+        file(TO_CMAKE_PATH  "${STAMP_DIR}" STAMP_DIR_CMAKE)
+        set(STAMP_DIR "${STAMP_DIR_CMAKE}")
+        file(TO_CMAKE_PATH  "${INSTALL_DIR}" INSTALL_DIR_CMAKE)
+        set(INSTALL_DIR "${INSTALL_DIR_CMAKE}")
+        file(TO_CMAKE_PATH  "${SOURCE_DIR}" SOURCE_DIR_CMAKE)
+        set(SOURCE_DIR "${SOURCE_DIR_CMAKE}")
+        file(TO_CMAKE_PATH  "${BUILD_DIR}" BUILD_DIR_CMAKE)
+        set(BUILD_DIR "${BUILD_DIR_CMAKE}")
+        file(TO_CMAKE_PATH  "${LOG_DIR}" LOG_DIR_CMAKE)
+        set(LOG_DIR "${LOG_DIR_CMAKE}")
+    endif()
 
     ExternalProject_Add(${TARGET}
         GIT_REPOSITORY ${EXTERNAL_GIT_REPOSITORY}

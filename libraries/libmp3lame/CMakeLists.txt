@@ -1,7 +1,7 @@
 project(libmp3lame)
 
 if(WIN32)
-    set(ENV_ARGS "LD=link")
+    set(ENV_ARGS "LD=link" "MSYS_NO_PATHCONV=1" "CONFIG_SHELL=bash")
 else()
     set(ENV_ARGS "CFLAGS=-O3")
     set(CONFIGURE_ARGS "--with-pic" "--enable-nasm")
@@ -18,7 +18,7 @@ add_external_target(libmp3lame
         --disable-frontend
         ${CONFIGURE_ARGS}
     BUILD_COMMAND ${MAKE_BIN} -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E env MSYS_NO_PATHCONV=1 -- ${MAKE_BIN} install
+    INSTALL_COMMAND ${MAKE_BIN} install
     DEPENDS zlib
     ENV_ARGS ${ENV_ARGS}
 )

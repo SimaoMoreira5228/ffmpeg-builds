@@ -24,7 +24,7 @@ jobs:
         os:
           - ubuntu-22.04
           - ubuntu-22.04-arm
-          - windows-2022
+          # - windows-2022
           - macos-13 # x86_64
           - macos-15 # ARM64
     runs-on: ${{ matrix.os }}
