@@ -66,6 +66,7 @@ jobs:
         shell: bash
         run: |
           mv /usr/bin/link.exe /usr/bin/gnu-link.exe
+          mv /usr/bin/perl /usr/bin/gnu-perl
           echo "GIT_CONFIG_COUNT=1" >> $GITHUB_ENV
           echo "GIT_CONFIG_KEY_0=core.autocrlf" >> $GITHUB_ENV
           echo "GIT_CONFIG_VALUE_0=false" >> $GITHUB_ENV
