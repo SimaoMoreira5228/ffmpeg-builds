@@ -8,10 +8,13 @@ ARCH=$(uname -m)
 case $OS in
     Darwin | Linux)
         export PKG_CONFIG="pkg-config --static"
-        perl="perl"
+        jom_bin=""
+        nmake_bin=""
         ;;
     CYGWIN* | MINGW* | MSYS*)
-        export PATH="~/scoop/apps/perl/current/perl/bin:$PATH"
+        jom_bin="$(which jom)"
+        nmake_bin="$(which nmake)"
+        export PKG_CONFIG="$(which pkg-config.exe)"
         ;;
     *)
         echo "Unsupported OS: $OS"
@@ -32,7 +35,17 @@ function build_ffmpeg() {
     local tar_name="ffmpeg-$tag-$OS-$ARCH"
     echo "::group::Building ffmpeg $tag"
 
-    cmake -GNinja -B build -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DFFMPEG_TAG=$tag -DPERL_BIN=${perl} -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    cmake -GNinja -B build \
+        -DCMAKE_INSTALL_PREFIX=$install_dir \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DFFMPEG_TAG=$tag \
+        -DBASH_BIN="$(which bash)" \
+        -DMAKE_BIN="$(which make)" \
+        -DMESON_BIN="$(which meson)" \
+        -DPERL_BIN="$(which perl)" \
+        -DJOM_BIN="${jom_bin}" \
+        -DNMAKE_BIN="${nmake_bin}" \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     cmake --build build --config Release --parallel ${CMAKE_BUILD_PARALLEL_LEVEL} --target install
 
     mkdir -p tmp/$tar_name
