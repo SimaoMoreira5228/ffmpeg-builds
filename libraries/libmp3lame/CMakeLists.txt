@@ -18,7 +18,7 @@ add_external_target(libmp3lame
         --disable-frontend
         ${CONFIGURE_ARGS}
     BUILD_COMMAND ${MAKE_BIN} -j$ENV{CMAKE_BUILD_PARALLEL_LEVEL}
-    INSTALL_COMMAND ${MAKE_BIN} install
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E env MSYS_NO_PATHCONV=1 -- ${MAKE_BIN} install
     DEPENDS zlib
     ENV_ARGS ${ENV_ARGS}
 )
