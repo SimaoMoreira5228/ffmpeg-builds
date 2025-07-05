@@ -59,9 +59,9 @@ jobs:
       - uses: MinoruSekine/setup-scoop@v4.0.1
         if: runner.os == 'Windows'
         with:
-          apps: perl nasm meson ninja pkg-config cmake make jom
+          apps: perl nasm meson ninja pkg-config cmake@3.31.6 make jom
 
-      - name: Move gnu link out of the way
+      - name: Move gnu bins out of the way
         if: runner.os == 'Windows'
         shell: bash
         run: |
