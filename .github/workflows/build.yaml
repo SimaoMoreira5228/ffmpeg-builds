@@ -47,8 +47,7 @@ jobs:
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-15' || matrix.os == 'macos-13'
         run: |
-          brew extract --version=3.31.6 cmake homebrew/core
-          brew install git nasm yasm cmake@3.31.6 make meson ninja pkg-config gettext libiconv
+          brew install git nasm yasm cmake@3.31 make meson ninja pkg-config gettext libiconv
 
       - uses: ilammy/msvc-dev-cmd@v1
         name: Setup MSVC
