@@ -36,6 +36,7 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm'
         run: |
+          set -euxo pipefail
           sudo apt-get update && sudo apt-get install -y git build-essential nasm yasm make cmake ninja-build pkg-config  gcc-12 g++-12
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
@@ -45,7 +46,9 @@ jobs:
 
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-15' || matrix.os == 'macos-13'
-        run: brew install git nasm yasm cmake@3.31.8 make meson ninja pkg-config gettext libiconv
+        run: |
+          brew install https://github.com/Homebrew/homebrew-core/raw/b4e46db74e74a8c1650b38b1da222284ce1ec5ce/Formula/c/cmake.rb
+          brew install git nasm yasm make meson ninja pkg-config gettext libiconv
 
       - uses: ilammy/msvc-dev-cmd@v1
         name: Setup MSVC
